@@ -1,0 +1,71 @@
+2 sensors:
+At start:
+    Shutdown 1 sensor
+    change it's address using general call address
+    Shutdown sensor, wake up other one
+    change it's address using general call address
+    wake up both sensors
+    Calibrate sensor 1
+    Calibrate sensor 2
+
+
+Ext I2C specs:
+
+Config register :
+Needed functions:
+Enable/disable
+Enable/disable automatic calibration wrt to temperature changes
+Enable Left
+Enable Right
+Enable interrupt
+Choose Sampling Frequency
+Change I2C address
+
+CONFIG1
+BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+
+
+      auto_cal_en   L_EN      R_EN     INT_EN     <- Sampling Frequency ->
+
+Data Registers:
+
+Left sensor
+Right sensor
+Minimal Value
+Maximal value
+
+Left sensor
+BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
+
+<-
+                    Distance detected by left sensor
+                                                                        ->
+
+BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+
+Right sensor
+BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
+
+<-
+                    Distance detected by right sensor
+                                                                        ->
+
+BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+
+Minimal value
+BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
+
+<-
+                    Distance min(right, left)
+                                                                        ->
+
+BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+
+Maximal value
+BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
+
+<-
+                    distance Max(right, left)
+                                                                        ->
+
+BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
