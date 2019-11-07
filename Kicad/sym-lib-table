@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name distance_sensors)(type Legacy)(uri ${KIPRJMOD}/libraries/distance_sensors.lib)(options "")(descr ""))
+)
