@@ -7,9 +7,9 @@ encoding utf-8
 Sheet 1 1
 Title "Frustrating Box - TOF Distance sensor"
 Date "2019-11-02"
-Rev "1.0"
+Rev "1.1"
 Comp "Université de Liège"
-Comment1 ""
+Comment1 "Rev 1.1. Removing 3.3 / 5v jumpers.  Updating MCLR circuit to use shottky diode"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -831,58 +831,6 @@ F 3 "" H 2150 4050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Jumper JP2
-U 1 1 5DD72D70
-P 2300 1550
-F 0 "JP2" H 2300 1500 50  0000 C CNN
-F 1 "Jumper" H 2300 1700 50  0000 C CNN
-F 2 "" H 2300 1550 50  0001 C CNN
-F 3 "~" H 2300 1550 50  0001 C CNN
-	1    2300 1550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1750 1550 1750 1200
-Wire Wire Line
-	1750 1200 2000 1200
-Wire Wire Line
-	1500 1550 1550 1550
-Connection ~ 1750 1550
-Wire Wire Line
-	1750 1550 2000 1550
-$Comp
-L Device:Jumper JP1
-U 1 1 5DD7CCD4
-P 2300 1200
-F 0 "JP1" H 2300 1150 50  0000 C CNN
-F 1 "Jumper" H 2300 1350 50  0000 C CNN
-F 2 "" H 2300 1200 50  0001 C CNN
-F 3 "~" H 2300 1200 50  0001 C CNN
-	1    2300 1200
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VDD #PWR05
-U 1 1 5DD805AC
-P 2600 1200
-F 0 "#PWR05" H 2600 1050 50  0001 C CNN
-F 1 "VDD" H 2617 1373 50  0000 C CNN
-F 2 "" H 2600 1200 50  0001 C CNN
-F 3 "" H 2600 1200 50  0001 C CNN
-	1    2600 1200
-	1    0    0    -1  
-$EndComp
-Wire Notes Line
-	2000 1750 2700 1750
-Wire Notes Line
-	2700 1750 2700 900 
-Wire Notes Line
-	2700 900  2000 900 
-Wire Notes Line
-	2000 900  2000 1750
-Text Notes 1700 850  0    50   ~ 0
-Selection between 3.3V and 5V input
-$Comp
 L Connector:Conn_01x06_Male J1
 U 1 1 5DD8B607
 P 1250 6850
@@ -981,22 +929,6 @@ Wire Notes Line
 	11150 5750 11150 3750
 Wire Notes Line
 	11150 3750 9100 3750
-Wire Wire Line
-	2600 1550 3150 1550
-$Comp
-L power:VCC #PWR0101
-U 1 1 5DC2BCB7
-P 1550 1550
-F 0 "#PWR0101" H 1550 1400 50  0001 C CNN
-F 1 "VCC" H 1567 1723 50  0000 C CNN
-F 2 "" H 1550 1550 50  0001 C CNN
-F 3 "" H 1550 1550 50  0001 C CNN
-	1    1550 1550
-	1    0    0    -1  
-$EndComp
-Connection ~ 1550 1550
-Wire Wire Line
-	1550 1550 1750 1550
 $Comp
 L power:VCC #PWR0102
 U 1 1 5DC2BD05
@@ -1065,4 +997,20 @@ Wire Notes Line
 	1550 3750 9000 3750
 Wire Notes Line
 	1550 5900 9000 5900
+$Comp
+L power:VCC #PWR0101
+U 1 1 5DC2BCB7
+P 2600 1550
+F 0 "#PWR0101" H 2600 1400 50  0001 C CNN
+F 1 "VCC" H 2617 1723 50  0000 C CNN
+F 2 "" H 2600 1550 50  0001 C CNN
+F 3 "" H 2600 1550 50  0001 C CNN
+	1    2600 1550
+	1    0    0    -1  
+$EndComp
+Connection ~ 2600 1550
+Wire Wire Line
+	2600 1550 3150 1550
+Wire Wire Line
+	1500 1550 2600 1550
 $EndSCHEMATC
