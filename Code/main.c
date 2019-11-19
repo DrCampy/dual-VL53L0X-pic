@@ -20,7 +20,6 @@
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
-#include <I2C.h>
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
