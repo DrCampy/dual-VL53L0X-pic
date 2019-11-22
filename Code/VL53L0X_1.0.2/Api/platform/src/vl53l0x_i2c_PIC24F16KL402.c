@@ -61,31 +61,87 @@ bool_t _check_min_version(void)
     return true;
 }
 
-int VL53L0X_i2c_init(char *comPortStr, unsigned int baudRate) // mja
+//Uses MSSP1 in I2C mode. Speed is 100 kbit
+int VL53L0X_i2c_init(void) // mja
 {
-
-    unsigned int status = STATUS_FAIL;
+    //Using standard speed mode
+    SSP1STAT.SMP=1;
     
-    /*TODO*/
-
-    return status;
+    //PCIE=0 - No interruption on stop bit detection
+    //SCIE=0 - No interruption on start bit detection
+    //Already set to 0 by default
+    
+    //Sets clock divider
+    SSP1ADD=0x4F; // If Fosc = 16MHz
+    //SSP1ADD=0x27; // If Fosc = 8MHz
+    
+    //Set TRIS bits 
+    //I2C1 uses RB8 (SCL) and RB9 (SDA)
+    
+    
+    //SSPEN=1 - Enables serial port and configures SDA1 and SCL1 as the serial port pins
+    //SSPM=1000 I2C master mode.
+    SSP1CON1 |= 0b0000000000101000;
+    
+    return STATUS_OK;
 }
 int32_t VL53L0X_comms_close(void)
 {
-    unsigned int status = STATUS_FAIL;
-    /*TODO*/
-    return status;
+    SSP1CON1 &= 0b1111111111011111;
+    
+    return STATUS_OK;
 }
 
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {
+    //1. Start
+    //2. Address
+    //3. ack ?
+    //4. Index
+    //5. ack ?
+    //6. Data
+    //7. Ack ?
+    //8. As long as there are bytes to be sent
+    // go back to step 6.
+    //Stop
+    
+    //1. Start
+    SSP1CON2.SEN = 1;
+    SSP1BUF = address;
+    while(IFS1.SSP1IF == 0); //Wait for interrupt
+    if(SSP1CON2.ACKSTAT != 0){
+        //Error
+        int i = 0;
+    }
+    SSP1BUF = reg;
+    for(uint8_t i = 0; i < count; i++){
+        if(SSP1CON2.ACKSTAT != 0){
+
+        }
+    // Continue...
+    
     int32_t status = STATUS_OK;
+    
     /*TODO*/
     return status;
 }
 
 int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
 {
+    //1. Start
+    //2. Address
+    //3. ack ?
+    //4. Index
+    //5. ack ?
+    //6. Repeated start
+    //7. Address
+    //8. Ack ?
+    //9. Read data
+    //10. Send ack
+    //8. As long as there are bytes to be read
+    // go back to step 9.
+    //Stop
+    
     int32_t status = STATUS_OK;
 
     return status;
