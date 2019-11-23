@@ -47,14 +47,8 @@ uint8_t cached_page = 0;
 #define MIN_COMMS_VERSION_BUILD     1
 #define MIN_COMMS_VERSION_REVISION  0
 
-
-#define MAX_STR_SIZE 255
-#define MAX_MSG_SIZE 100
-#define MAX_DEVICES 4
 #define STATUS_OK              0x00
 #define STATUS_FAIL            0x01
-
-static unsigned char _dataBytes[MAX_MSG_SIZE];
 
 bool_t _check_min_version(void)
 {
@@ -93,37 +87,49 @@ int32_t VL53L0X_comms_close(void)
 }
 
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
-{
-    //1. Start
-    //2. Address
-    //3. ack ?
-    //4. Index
-    //5. ack ?
-    //6. Data
-    //7. Ack ?
-    //8. As long as there are bytes to be sent
-    // go back to step 6.
-    //Stop
-    
+{   
     //1. Start
     SSP1CON2.SEN = 1;
+    
+    //2. Send address
     SSP1BUF = address;
-    while(IFS1.SSP1IF == 0); //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    
+    //3. Check for ack
     if(SSP1CON2.ACKSTAT != 0){
         //Error
-        int i = 0;
+        SSP1CON2.PEN = 1;
+        return STATUS_FAIL;
     }
+    //4. Send Index
     SSP1BUF = reg;
-    for(uint8_t i = 0; i < count; i++){
+    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    
+    //5. Check for ack
+    if(SSP1CON2.ACKSTAT != 0){
+        //Error
+        SSP1CON2.PEN = 1;
+        return STATUS_FAIL;
+    }
+    
+    uint8_t i = 0;
+    for(; i < count; i++){
+        //6. send data
+        SSP1BUF = pdata[i];
+        while(IFS1.SSP1IF == 0){} //Wait for interrupt
+        
+        //Check for ack
         if(SSP1CON2.ACKSTAT != 0){
-
+            //Error
+            SSP1CON2.PEN = 1;
+            return STATUS_FAIL;
         }
-    // Continue...
+    }
     
-    int32_t status = STATUS_OK;
-    
-    /*TODO*/
-    return status;
+    //8. Send stop
+    SSP1CON2.PEN = 1;
+
+    return STATUS_OK;
 }
 
 int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
@@ -142,9 +148,62 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     // go back to step 9.
     //Stop
     
-    int32_t status = STATUS_OK;
+    //1. Start
+    SSP1CON2.SEN = 1;
+    
+    //2. Send address 
+    SSP1BUF = address;
+    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    
+    //3. Check for ack
+    if(SSP1CON2.ACKSTAT != 0){
+        //Error
+        SSP1CON2.PEN = 1;
+        return STATUS_FAIL;
+    }
+    //4. Send Index
+    SSP1BUF = index;
+    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    
+    //5. Check for ack
+    if(SSP1CON2.ACKSTAT != 0){
+        //Error
+        SSP1CON2.PEN = 1;
+        return STATUS_FAIL;
+    }
+    
+    //6. Enters receiving mode
+    SSP1CON2.RCEN = 1;
+    
+    //7. Send repeated start
+    SSP1CON2.REN = 1;
+    
+    //8. Send address + 1 for reading
+    SSP1BUF = address+1;
+    
+    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    
+    //5. Check for ack
+    if(SSP1CON2.ACKSTAT != 0){
+        //Error
+        SSP1CON2.PEN = 1;
+        SSP1CON2.RCEN = 0;
+        return STATUS_FAIL;
+    }
+    
+    for(uint8_t i = 0; i < count; i++){
+        //9. gets data
+        while(IFS1.SSP1IF == 0){} //Wait for interrupt
+        pdata[i] = SSP1BUF;
+        //Sends ack
+        SSP1CON2.ACKEN = 1;
+    }
+    
+    //8. Send stop
+    SSP1CON2.PEN = 1;
+    SSP1CON2.RCEN = 0; //leaves receive mode
 
-    return status;
+    return STATUS_OK;
 }
 
 
@@ -377,11 +436,7 @@ int32_t VL53L0X_platform_wait_us(int32_t wait_us)
     int32_t status = STATUS_OK;
     float wait_ms = (float)wait_us/1000.0f;
 
-    /*
-     * Use windows event handling to perform non-blocking wait.
-     */
-    HANDLE hEvent = CreateEvent(0, TRUE, FALSE, 0);
-    WaitForSingleObject(hEvent, (int)(wait_ms + 0.5f));
+
 
 #ifdef VL53L0X_LOG_ENABLE
     trace_i2c("Wait us : %6d\n", wait_us);
@@ -399,8 +454,7 @@ int32_t VL53L0X_wait_ms(int32_t wait_ms)
     /*
      * Use windows event handling to perform non-blocking wait.
      */
-    HANDLE hEvent = CreateEvent(0, TRUE, FALSE, 0);
-    WaitForSingleObject(hEvent, wait_ms);
+
 
 #ifdef VL53L0X_LOG_ENABLE
     trace_i2c("Wait ms : %6d\n", wait_ms);
