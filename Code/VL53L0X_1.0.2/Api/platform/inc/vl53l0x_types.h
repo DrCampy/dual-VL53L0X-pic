@@ -44,6 +44,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *  If stddef.h is not available review and adapt NULL definition .
  */
 #include <stdint.h>
+/*For whatever reason stdint.h does not define any "STDINT_H* or equivalent.*/
+#define STDINT_H
 #include <stddef.h>
 
 #ifndef NULL
