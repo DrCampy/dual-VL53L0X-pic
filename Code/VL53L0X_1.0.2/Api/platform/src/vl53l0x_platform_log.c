@@ -18,7 +18,7 @@
  */
 
 
-#include <stdio.h>    // sprintf(), vsnprintf(), printf()
+#include <stdio.h>    /* sprintf(), vsnprintf(), printf()*/
 
 #ifdef _MSC_VER
 #define snprintf _snprintf

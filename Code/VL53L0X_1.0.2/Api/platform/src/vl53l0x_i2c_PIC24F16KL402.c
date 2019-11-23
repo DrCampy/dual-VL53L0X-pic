@@ -17,8 +17,9 @@
  *
  */
 
-#include <xc.h>
-#include <stdio.h>    // sprintf(), vsnprintf(), printf()
+/* sprintf(), vsnprintf(), printf()*/
+#include <stdio.h>
+#include <stddef.h>
 #include <stdbool.h>
 #ifdef _MSC_VER
 #define snprintf _snprintf
@@ -32,6 +33,8 @@
 #include <time.h>
 
 #include "vl53l0x_platform_log.h"
+
+#include <xc.h>
 
 #ifdef VL53L0X_LOG_ENABLE
 #define trace_print(level, ...) trace_print_module_function(TRACE_MODULE_PLATFORM, level, TRACE_FUNCTION_NONE, ##__VA_ARGS__)
@@ -55,26 +58,25 @@ bool_t _check_min_version(void)
     return true;
 }
 
-//Uses MSSP1 in I2C mode. Speed is 100 kbit
-int VL53L0X_i2c_init(void) // mja
+/*Uses MSSP1 in I2C mode. Speed is 100 kbit*/
+int VL53L0X_i2c_init(void)
 {
-    //Using standard speed mode
+    /*Using standard speed mode*/
     SSP1STAT.SMP=1;
     
-    //PCIE=0 - No interruption on stop bit detection
-    //SCIE=0 - No interruption on start bit detection
-    //Already set to 0 by default
+    /*PCIE=0 - No interruption on stop bit detection
+     *SCIE=0 - No interruption on start bit detection
+     *Already set to 0 by default*/
     
-    //Sets clock divider
-    SSP1ADD=0x4F; // If Fosc = 16MHz
-    //SSP1ADD=0x27; // If Fosc = 8MHz
+    /*Sets clock divider*/
+    SSP1ADD=0x4F; /* If Fosc = 16MHz*/
+    /*SSP1ADD=0x27; // If Fosc = 8MHz*/
     
-    //Set TRIS bits 
-    //I2C1 uses RB8 (SCL) and RB9 (SDA)
+    /*Set TRIS bits 
+     *I2C1 uses RB8 (SCL) and RB9 (SDA)
     
-    
-    //SSPEN=1 - Enables serial port and configures SDA1 and SCL1 as the serial port pins
-    //SSPM=1000 I2C master mode.
+     *SSPEN=1 - Enables serial port and configures SDA1 and SCL1 as the serial port pins
+     *SSPM=1000 I2C master mode.*/
     SSP1CON1 |= 0b0000000000101000;
     
     return STATUS_OK;
@@ -88,45 +90,45 @@ int32_t VL53L0X_comms_close(void)
 
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {   
-    //1. Start
+    /*1. Start*/
     SSP1CON2.SEN = 1;
     
-    //2. Send address
+    /*2. Send address*/
     SSP1BUF = address;
-    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
     
-    //3. Check for ack
+    /*3. Check for ack*/
     if(SSP1CON2.ACKSTAT != 0){
-        //Error
+        /*Error*/
         SSP1CON2.PEN = 1;
         return STATUS_FAIL;
     }
-    //4. Send Index
+    /*4. Send Index*/
     SSP1BUF = reg;
-    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
     
-    //5. Check for ack
+    /*5. Check for ack*/
     if(SSP1CON2.ACKSTAT != 0){
-        //Error
+        /*Error*/
         SSP1CON2.PEN = 1;
         return STATUS_FAIL;
     }
     
     uint8_t i = 0;
     for(; i < count; i++){
-        //6. send data
+        /*6. send data*/
         SSP1BUF = pdata[i];
-        while(IFS1.SSP1IF == 0){} //Wait for interrupt
+        while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
         
-        //Check for ack
+        /*Check for ack*/
         if(SSP1CON2.ACKSTAT != 0){
-            //Error
+            /*Error*/
             SSP1CON2.PEN = 1;
             return STATUS_FAIL;
         }
     }
     
-    //8. Send stop
+    /*8. Send stop*/
     SSP1CON2.PEN = 1;
 
     return STATUS_OK;
@@ -134,74 +136,61 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
 
 int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
 {
-    //1. Start
-    //2. Address
-    //3. ack ?
-    //4. Index
-    //5. ack ?
-    //6. Repeated start
-    //7. Address
-    //8. Ack ?
-    //9. Read data
-    //10. Send ack
-    //8. As long as there are bytes to be read
-    // go back to step 9.
-    //Stop
-    
-    //1. Start
+    /*1. Start*/
     SSP1CON2.SEN = 1;
     
-    //2. Send address 
+    /*2. Send address */
     SSP1BUF = address;
-    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
     
-    //3. Check for ack
+    /*3. Check for ack*/
     if(SSP1CON2.ACKSTAT != 0){
-        //Error
+        /*Error*/
         SSP1CON2.PEN = 1;
         return STATUS_FAIL;
     }
-    //4. Send Index
+    /*4. Send Index*/
     SSP1BUF = index;
-    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
     
-    //5. Check for ack
+    /*5. Check for ack*/
     if(SSP1CON2.ACKSTAT != 0){
-        //Error
+        /*Error*/
         SSP1CON2.PEN = 1;
         return STATUS_FAIL;
     }
     
-    //6. Enters receiving mode
+    /*6. Enters receiving mode*/
     SSP1CON2.RCEN = 1;
     
-    //7. Send repeated start
+    /*7. Send repeated start*/
     SSP1CON2.REN = 1;
     
-    //8. Send address + 1 for reading
+    /*8. Send address + 1 for reading*/
     SSP1BUF = address+1;
     
-    while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
     
-    //5. Check for ack
+    /*5. Check for ack*/
     if(SSP1CON2.ACKSTAT != 0){
-        //Error
+        /*Error*/
         SSP1CON2.PEN = 1;
         SSP1CON2.RCEN = 0;
         return STATUS_FAIL;
     }
     
-    for(uint8_t i = 0; i < count; i++){
-        //9. gets data
-        while(IFS1.SSP1IF == 0){} //Wait for interrupt
+    uint8_t i = 0;
+    for(; i < count; i++){
+        /*9. gets data*/
+        while(IFS1.SSP1IF == 0){} /*Wait for interrupt*/
         pdata[i] = SSP1BUF;
-        //Sends ack
+        /*Sends ack*/
         SSP1CON2.ACKEN = 1;
     }
     
-    //8. Send stop
+    /*8. Send stop*/
     SSP1CON2.PEN = 1;
-    SSP1CON2.RCEN = 0; //leaves receive mode
+    SSP1CON2.RCEN = 0; /*leaves receive mode*/
 
     return STATUS_OK;
 }
@@ -229,7 +218,7 @@ int32_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
 
     uint8_t  buffer[BYTES_PER_WORD];
 
-    // Split 16-bit word into MS and LS uint8_t
+    /* Split 16-bit word into MS and LS uint8_t*/
     buffer[0] = (uint8_t)(data >> 8);
     buffer[1] = (uint8_t)(data &  0x00FF);
 
@@ -237,7 +226,7 @@ int32_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
     {
         status = VL53L0X_write_multi(address, index, &buffer[0], 1);
         status = VL53L0X_write_multi(address, index + 1, &buffer[1], 1);
-        // serial comms cannot handle word writes to non 2-byte aligned registers.
+        /* serial comms cannot handle word writes to non 2-byte aligned registers.*/
     }
     else
     {
@@ -254,7 +243,7 @@ int32_t VL53L0X_write_dword(uint8_t address, uint8_t index, uint32_t data)
     int32_t status = STATUS_OK;
     uint8_t  buffer[BYTES_PER_DWORD];
 
-    // Split 32-bit word into MS ... LS bytes
+    /* Split 32-bit word into MS ... LS bytes*/
     buffer[0] = (uint8_t) (data >> 24);
     buffer[1] = (uint8_t)((data &  0x00FF0000) >> 16);
     buffer[2] = (uint8_t)((data &  0x0000FF00) >> 8);
@@ -309,7 +298,7 @@ int32_t VL53L0X_read_dword(uint8_t address, uint8_t index, uint32_t *pdata)
 
 
 
-// 16 bit address functions
+/* 16 bit address functions*/
 
 
 int32_t VL53L0X_write_multi16(uint8_t address, uint16_t index, uint8_t *pdata, int32_t count)
@@ -350,7 +339,7 @@ int32_t VL53L0X_write_word16(uint8_t address, uint16_t index, uint16_t data)
 
     uint8_t  buffer[BYTES_PER_WORD];
 
-    // Split 16-bit word into MS and LS uint8_t
+    /* Split 16-bit word into MS and LS uint8_t*/
     buffer[0] = (uint8_t)(data >> 8);
     buffer[1] = (uint8_t)(data &  0x00FF);
 
@@ -358,7 +347,7 @@ int32_t VL53L0X_write_word16(uint8_t address, uint16_t index, uint16_t data)
     {
         status = VL53L0X_write_multi16(address, index, &buffer[0], 1);
         status = VL53L0X_write_multi16(address, index + 1, &buffer[1], 1);
-        // serial comms cannot handle word writes to non 2-byte aligned registers.
+        /* serial comms cannot handle word writes to non 2-byte aligned registers.*/
     }
     else
     {
@@ -375,7 +364,7 @@ int32_t VL53L0X_write_dword16(uint8_t address, uint16_t index, uint32_t data)
     int32_t status = STATUS_OK;
     uint8_t  buffer[BYTES_PER_DWORD];
 
-    // Split 32-bit word into MS ... LS bytes
+    /* Split 32-bit word into MS ... LS bytes*/
     buffer[0] = (uint8_t) (data >> 24);
     buffer[1] = (uint8_t)((data &  0x00FF0000) > 16);
     buffer[2] = (uint8_t)((data &  0x0000FF00) > 8);
@@ -436,12 +425,6 @@ int32_t VL53L0X_platform_wait_us(int32_t wait_us)
     int32_t status = STATUS_OK;
     float wait_ms = (float)wait_us/1000.0f;
 
-
-
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("Wait us : %6d\n", wait_us);
-#endif
-
     return status;
 
 }
@@ -451,15 +434,6 @@ int32_t VL53L0X_wait_ms(int32_t wait_ms)
 {
     int32_t status = STATUS_OK;
 
-    /*
-     * Use windows event handling to perform non-blocking wait.
-     */
-
-
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("Wait ms : %6d\n", wait_ms);
-#endif
-
     return status;
 
 }
@@ -468,10 +442,8 @@ int32_t VL53L0X_wait_ms(int32_t wait_ms)
 int32_t VL53L0X_set_gpio(uint8_t level)
 {
     int32_t status = STATUS_OK;
-    //status = VL53L0X_set_gpio_sv(level);
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("// Set GPIO = %d;\n", level);
-#endif
+    /*status = VL53L0X_set_gpio_sv(level);*/
+
     return status;
 
 }
@@ -480,9 +452,7 @@ int32_t VL53L0X_set_gpio(uint8_t level)
 int32_t VL53L0X_get_gpio(uint8_t *plevel)
 {
     int32_t status = STATUS_OK;
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("// Get GPIO = %d;\n", *plevel);
-#endif
+
     return status;
 }
 
@@ -490,9 +460,7 @@ int32_t VL53L0X_get_gpio(uint8_t *plevel)
 int32_t VL53L0X_release_gpio(void)
 {
     int32_t status = STATUS_OK;
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("// Releasing force on GPIO\n");
-#endif
+
     return status;
 
 }
@@ -500,9 +468,7 @@ int32_t VL53L0X_release_gpio(void)
 int32_t VL53L0X_cycle_power(void)
 {
     int32_t status = STATUS_OK;
-#ifdef VL53L0X_LOG_ENABLE
-    trace_i2c("// cycle sensor power\n");
-#endif
+
 	return status;
 }
 

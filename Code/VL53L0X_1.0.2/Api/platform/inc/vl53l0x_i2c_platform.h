@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-// Include uint8_t, unit16_t  etc definitions
+/* Include uint8_t, unit16_t  etc definitions*/
 
 #include <stdint.h>
 #include <stdarg.h>
@@ -39,7 +39,7 @@ extern "C" {
  *
  */
 
-// enum  {TRUE = true, FALSE = false};
+/* enum  {TRUE = true, FALSE = false};*/
 
 /**
  * @brief Typedef defining 8 bit unsigned char type.\n
@@ -400,5 +400,5 @@ int32_t VL53L0X_get_timer_value(int32_t *ptimer_count);
 }
 #endif
 
-#endif //_VL53L0X_I2C_PLATFORM_H_
+#endif /*_VL53L0X_I2C_PLATFORM_H_*/
 
