@@ -34,12 +34,12 @@
 #ifndef __KERNEL__
 #include <stdlib.h>
 #endif
-#define LOG_FUNCTION_START(fmt, ...) \
+/*#define LOG_FUNCTION_START(fmt, ...) \
 	_LOG_FUNCTION_START(TRACE_MODULE_API, fmt, ##__VA_ARGS__)
 #define LOG_FUNCTION_END(status, ...) \
 	_LOG_FUNCTION_END(TRACE_MODULE_API, status, ##__VA_ARGS__)
 #define LOG_FUNCTION_END_FMT(status, fmt, ...) \
-	_LOG_FUNCTION_END_FMT(TRACE_MODULE_API, status, fmt, ##__VA_ARGS__)
+	_LOG_FUNCTION_END_FMT(TRACE_MODULE_API, status, fmt, ##__VA_ARGS__)*/
 
 VL53L0X_Error VL53L0X_reverse_bytes(uint8_t *data, uint32_t size)
 {
@@ -64,8 +64,6 @@ VL53L0X_Error VL53L0X_measurement_poll_for_completion(VL53L0X_DEV Dev)
 	uint8_t NewDataReady = 0;
 	uint32_t LoopNb;
 
-	LOG_FUNCTION_START("");
-
 	LoopNb = 0;
 
 	do {
@@ -84,8 +82,6 @@ VL53L0X_Error VL53L0X_measurement_poll_for_completion(VL53L0X_DEV Dev)
 
 		VL53L0X_PollingDelay(Dev);
 	} while (1);
-
-	LOG_FUNCTION_END(Status);
 
 	return Status;
 }
@@ -129,7 +125,7 @@ uint32_t VL53L0X_isqrt(uint32_t num)
 	 */
 
 	uint32_t  res = 0;
-	uint32_t  bit = 1 << 30;
+	uint32_t  bit = (uint32_t)1 << 30;
 	/* The second-to-top bit is set:
 	 *	1 << 14 for 16-bits, 1 << 30 for 32 bits */
 
@@ -180,7 +176,6 @@ VL53L0X_Error VL53L0X_device_read_strobe(VL53L0X_DEV Dev)
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	uint8_t strobe;
 	uint32_t LoopNb;
-	LOG_FUNCTION_START("");
 
 	Status |= VL53L0X_WrByte(Dev, 0x83, 0x00);
 
@@ -203,9 +198,7 @@ VL53L0X_Error VL53L0X_device_read_strobe(VL53L0X_DEV Dev)
 
 	Status |= VL53L0X_WrByte(Dev, 0x83, 0x01);
 
-	LOG_FUNCTION_END(Status);
 	return Status;
-
 }
 
 VL53L0X_Error VL53L0X_get_info_from_device(VL53L0X_DEV Dev, uint8_t option)
@@ -231,9 +224,6 @@ VL53L0X_Error VL53L0X_get_info_from_device(VL53L0X_DEV Dev, uint8_t option)
 	FixPoint1616_t SignalRateMeasFixed400mmFix = 0;
 	uint8_t NvmRefGoodSpadMap[VL53L0X_REF_SPAD_BUFFER_SIZE];
 	int i;
-
-
-	LOG_FUNCTION_START("");
 
 	ReadDataFromDeviceDone = VL53L0X_GETDEVICESPECIFICPARAMETER(Dev,
 			ReadDataFromDeviceDone);
@@ -470,7 +460,6 @@ VL53L0X_Error VL53L0X_get_info_from_device(VL53L0X_DEV Dev, uint8_t option)
 				byte);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -481,8 +470,6 @@ uint32_t VL53L0X_calc_macro_period_ps(VL53L0X_DEV Dev, uint8_t vcsel_period_pclk
 	uint32_t macro_period_vclks;
 	uint32_t macro_period_ps;
 
-	LOG_FUNCTION_START("");
-
 	/* The above calculation will produce rounding errors,
 	   therefore set fixed value
 	*/
@@ -492,7 +479,6 @@ uint32_t VL53L0X_calc_macro_period_ps(VL53L0X_DEV Dev, uint8_t vcsel_period_pclk
 	macro_period_ps = (uint32_t)(macro_period_vclks
 			* vcsel_period_pclks * PLL_period_ps);
 
-	LOG_FUNCTION_END("");
 	return macro_period_ps;
 }
 
@@ -1125,8 +1111,6 @@ VL53L0X_Error VL53L0X_set_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 	uint32_t cMinTimingBudgetMicroSeconds	= 20000;
 	uint32_t SubTimeout = 0;
 
-	LOG_FUNCTION_START("");
-
 	if (MeasurementTimingBudgetMicroSeconds
 			< cMinTimingBudgetMicroSeconds) {
 		Status = VL53L0X_ERROR_INVALID_PARAMS;
@@ -1172,7 +1156,6 @@ VL53L0X_Error VL53L0X_set_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 		}
 
 		if (Status != VL53L0X_ERROR_NONE) {
-			LOG_FUNCTION_END(Status);
 			return Status;
 		}
 
@@ -1206,7 +1189,6 @@ VL53L0X_Error VL53L0X_set_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 	}
 
 	if (Status != VL53L0X_ERROR_NONE) {
-		LOG_FUNCTION_END(Status);
 		return Status;
 	}
 
@@ -1252,8 +1234,6 @@ VL53L0X_Error VL53L0X_set_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 			MeasurementTimingBudgetMicroSeconds);
 	}
 
-	LOG_FUNCTION_END(Status);
-
 	return Status;
 }
 
@@ -1273,8 +1253,6 @@ VL53L0X_Error VL53L0X_get_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 	uint32_t FinalRangeOverheadMicroSeconds = 550;
 	uint32_t PreRangeTimeoutMicroSeconds	= 0;
 
-	LOG_FUNCTION_START("");
-
 	/* Start and end overhead times always present */
 	*pMeasurementTimingBudgetMicroSeconds
 		= StartOverheadMicroSeconds + EndOverheadMicroSeconds;
@@ -1282,7 +1260,6 @@ VL53L0X_Error VL53L0X_get_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 	Status = VL53L0X_GetSequenceStepEnables(Dev, &SchedulerSequenceSteps);
 
 	if (Status != VL53L0X_ERROR_NONE) {
-		LOG_FUNCTION_END(Status);
 		return Status;
 	}
 
@@ -1342,7 +1319,6 @@ VL53L0X_Error VL53L0X_get_measurement_timing_budget_micro_seconds(VL53L0X_DEV De
 			*pMeasurementTimingBudgetMicroSeconds);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -1361,8 +1337,6 @@ VL53L0X_Error VL53L0X_load_tuning_settings(VL53L0X_DEV Dev,
 	uint8_t Address;
 	uint8_t localBuffer[4]; /* max */
 	uint16_t Temp16;
-
-	LOG_FUNCTION_START("");
 
 	Index = 0;
 
@@ -1430,7 +1404,6 @@ VL53L0X_Error VL53L0X_load_tuning_settings(VL53L0X_DEV Dev,
 		}
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -1477,8 +1450,6 @@ VL53L0X_Error VL53L0X_get_total_signal_rate(VL53L0X_DEV Dev,
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	FixPoint1616_t totalXtalkMegaCps;
 
-	LOG_FUNCTION_START("");
-
 	*ptotal_signal_rate_mcps =
 		pRangingMeasurementData->SignalRateRtnMegaCps;
 
@@ -1524,8 +1495,6 @@ VL53L0X_Error VL53L0X_calc_dmax(
 	uint32_t signalRateTemp_mcps;
 
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	dmaxCalRange_mm =
 		PALDevDataGet(Dev, DmaxCalRangeMilliMeter);
@@ -1677,8 +1646,6 @@ VL53L0X_Error VL53L0X_calc_dmax(
 	if (dmaxDark > dmaxAmbient)
 		*pdmax_mm = dmaxAmbient;
 
-	LOG_FUNCTION_END(Status);
-
 	return Status;
 }
 
@@ -1742,8 +1709,6 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 	 *
 	 * Estimates the range sigma
 	 */
-
-	LOG_FUNCTION_START("");
 
 	VL53L0X_GETPARAMETERFIELD(Dev, XTalkCompensationRateMegaCps,
 			xTalkCompRate_mcps);
@@ -1825,7 +1790,6 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 	}
 
 	if (Status != VL53L0X_ERROR_NONE) {
-		LOG_FUNCTION_END(Status);
 		return Status;
 	}
 
@@ -1878,7 +1842,7 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 		xTalkCorrection <<= 8;
 
 		if(pRangingMeasurementData->RangeStatus != 0){
-			pwMult = 1 << 16;
+			pwMult = (uint32_t)1 << 16;
 		} else {
 			/* FixPoint1616/uint32 = FixPoint1616 */
 			pwMult = deltaT_ps/cVcselPulseWidth_ps; /* smaller than 1.0f */
@@ -1888,13 +1852,13 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 			 * values are small enough such that32 bits will not be
 			 * exceeded.
 			 */
-			pwMult *= ((1 << 16) - xTalkCorrection);
+			pwMult *= (((uint32_t)1 << 16) - xTalkCorrection);
 
 			/* (FixPoint3232 >> 16) = FixPoint1616 */
 			pwMult =  (pwMult + c16BitRoundingParam) >> 16;
 
 			/* FixPoint1616 + FixPoint1616 = FixPoint1616 */
-			pwMult += (1 << 16);
+			pwMult += ((uint32_t)1 << 16);
 
 			/*
 			 * At this point the value will be 1.xx, therefore if we square
@@ -2001,7 +1965,6 @@ VL53L0X_Error VL53L0X_calc_sigma_estimate(VL53L0X_DEV Dev,
 			pDmax_mm);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -2031,9 +1994,6 @@ VL53L0X_Error VL53L0X_get_pal_range_status(VL53L0X_DEV Dev,
 	uint8_t Temp8;
 	uint32_t Dmax_mm = 0;
 	FixPoint1616_t LastSignalRefMcps;
-
-	LOG_FUNCTION_START("");
-
 
 	/*
 	 * VL53L0X has a good ranging when the value of the
@@ -2233,7 +2193,5 @@ VL53L0X_Error VL53L0X_get_pal_range_status(VL53L0X_DEV Dev,
 				Temp8);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
-
 }

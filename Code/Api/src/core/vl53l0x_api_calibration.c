@@ -33,13 +33,13 @@
 #ifndef __KERNEL__
 #include <stdlib.h>
 #endif
-
+/*
 #define LOG_FUNCTION_START(fmt, ...) \
 	_LOG_FUNCTION_START(TRACE_MODULE_API, fmt, ##__VA_ARGS__)
 #define LOG_FUNCTION_END(status, ...) \
 	_LOG_FUNCTION_END(TRACE_MODULE_API, status, ##__VA_ARGS__)
 #define LOG_FUNCTION_END_FMT(status, fmt, ...) \
-	_LOG_FUNCTION_END_FMT(TRACE_MODULE_API, status, fmt, ##__VA_ARGS__)
+	_LOG_FUNCTION_END_FMT(TRACE_MODULE_API, status, fmt, ##__VA_ARGS__)*/
 
 #define REF_ARRAY_SPAD_0  0
 #define REF_ARRAY_SPAD_5  5
@@ -117,9 +117,9 @@ VL53L0X_Error VL53L0X_perform_xtalk_calibration(VL53L0X_DEV Dev,
 		/* FixPoint1616_t / uint16_t = FixPoint1616_t */
 		xTalkStoredMeanSignalRate = sum_signalRate / total_count;
 		xTalkStoredMeanRange = (FixPoint1616_t)((uint32_t)(
-			sum_ranging << 16) / total_count);
+			(uint32_t)sum_ranging << 16) / total_count);
 		xTalkStoredMeanRtnSpads = (FixPoint1616_t)((uint32_t)(
-			sum_spads << 16) / total_count);
+			(uint32_t)sum_spads << 16) / total_count);
 
 		/* Round Mean Spads to Whole Number.
 		 * Typically the calculated mean SPAD count is a whole number
@@ -163,7 +163,7 @@ VL53L0X_Error VL53L0X_perform_xtalk_calibration(VL53L0X_DEV Dev,
 			 * Fixed1616 * (Fixed1616 - Fixed1616/int) :=
 			 * (2^16 * Fixed1616)
 			 */
-			signalXTalkTotalPerSpad *= ((1 << 16) -
+			signalXTalkTotalPerSpad *= (((uint32_t)1 << 16) -
 				(xTalkStoredMeanRange / xTalkCalDistanceAsInt));
 
 			/* Round from 2^16 * Fixed1616, to Fixed1616. */
@@ -252,7 +252,7 @@ VL53L0X_Error VL53L0X_perform_offset_calibration(VL53L0X_DEV Dev,
 
 	if (Status == VL53L0X_ERROR_NONE) {
 		/* FixPoint1616_t / uint16_t = FixPoint1616_t */
-		StoredMeanRange = (FixPoint1616_t)((uint32_t)(sum_ranging << 16)
+		StoredMeanRange = (FixPoint1616_t)((uint32_t)((uint32_t)sum_ranging << 16)
 			/ total_count);
 
 		StoredMeanRangeAsInt = (StoredMeanRange + 0x8000) >> 16;
@@ -295,8 +295,6 @@ VL53L0X_Error VL53L0X_set_offset_calibration_data_micro_meter(VL53L0X_DEV Dev,
 	int16_t cOffsetRange = 4096;
 	uint32_t encodedOffsetVal;
 
-	LOG_FUNCTION_START("");
-
 	if (OffsetCalibrationDataMicroMeter > cMaxOffsetMicroMeter)
 		OffsetCalibrationDataMicroMeter = cMaxOffsetMicroMeter;
 	else if (OffsetCalibrationDataMicroMeter < cMinOffsetMicroMeter)
@@ -319,7 +317,6 @@ VL53L0X_Error VL53L0X_set_offset_calibration_data_micro_meter(VL53L0X_DEV Dev,
 		VL53L0X_REG_ALGO_PART_TO_PART_RANGE_OFFSET_MM,
 		encodedOffsetVal);
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 

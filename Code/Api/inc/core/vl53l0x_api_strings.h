@@ -59,7 +59,7 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckId,
 	char *pLimitCheckString);
 
-
+#define USE_EMPTY_STRING
 #ifdef USE_EMPTY_STRING
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME                             ""
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS0                         ""
@@ -141,6 +141,12 @@ VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckI
 	#define  VL53L0X_STRING_SEQUENCESTEP_MSRC                            ""
 	#define  VL53L0X_STRING_SEQUENCESTEP_PRE_RANGE                       ""
 	#define  VL53L0X_STRING_SEQUENCESTEP_FINAL_RANGE                     ""
+    
+    /*Missing ?*/
+  	#define  VL53L0X_STRING_ERROR_INTERRUPT_NOT_CLEARED                  ""
+	#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_RATE_MSRC                 ""
+	#define  VL53L0X_STRING_CHECKENABLE_SIGNAL_RATE_PRE_RANGE            ""
+
 #else
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME          "VL53L0X cut1.0"
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS0      "VL53L0X TS0"

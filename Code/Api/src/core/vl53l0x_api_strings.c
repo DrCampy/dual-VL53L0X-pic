@@ -34,14 +34,6 @@
 #include <stdlib.h>
 #endif
 
-#define LOG_FUNCTION_START(fmt, ...) \
-	_LOG_FUNCTION_START(TRACE_MODULE_API, fmt, ##__VA_ARGS__)
-#define LOG_FUNCTION_END(status, ...) \
-	_LOG_FUNCTION_END(TRACE_MODULE_API, status, ##__VA_ARGS__)
-#define LOG_FUNCTION_END_FMT(status, fmt, ...) \
-	_LOG_FUNCTION_END_FMT(TRACE_MODULE_API, status, fmt, ##__VA_ARGS__)
-
-
 VL53L0X_Error VL53L0X_check_part_used(VL53L0X_DEV Dev,
 		uint8_t *Revision,
 		VL53L0X_DeviceInfo_t *pVL53L0X_DeviceInfo)
@@ -49,8 +41,6 @@ VL53L0X_Error VL53L0X_check_part_used(VL53L0X_DEV Dev,
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	uint8_t ModuleIdInt;
 	char *ProductId_tmp;
-
-	LOG_FUNCTION_START("");
 
 	Status = VL53L0X_get_info_from_device(Dev, 2);
 
@@ -68,7 +58,6 @@ VL53L0X_Error VL53L0X_check_part_used(VL53L0X_DEV Dev,
 	}
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -124,8 +113,6 @@ VL53L0X_Error VL53L0X_get_device_error_string(VL53L0X_DeviceError ErrorCode,
 		char *pDeviceErrorString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	switch (ErrorCode) {
 	case VL53L0X_DEVICEERROR_NONE:
@@ -195,7 +182,6 @@ VL53L0X_Error VL53L0X_get_device_error_string(VL53L0X_DeviceError ErrorCode,
 
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -203,8 +189,6 @@ VL53L0X_Error VL53L0X_get_range_status_string(uint8_t RangeStatus,
 		char *pRangeStatusString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	switch (RangeStatus) {
 	case 0:
@@ -237,7 +221,6 @@ VL53L0X_Error VL53L0X_get_range_status_string(uint8_t RangeStatus,
 				VL53L0X_STRING_RANGESTATUS_NONE);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -245,8 +228,6 @@ VL53L0X_Error VL53L0X_get_pal_error_string(VL53L0X_Error PalErrorCode,
 		char *pPalErrorString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	switch (PalErrorCode) {
 	case VL53L0X_ERROR_NONE:
@@ -327,7 +308,6 @@ VL53L0X_Error VL53L0X_get_pal_error_string(VL53L0X_Error PalErrorCode,
 				VL53L0X_STRING_UNKNOW_ERROR_CODE);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -335,8 +315,6 @@ VL53L0X_Error VL53L0X_get_pal_state_string(VL53L0X_State PalStateCode,
 		char *pPalStateString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	switch (PalStateCode) {
 	case VL53L0X_STATE_POWERDOWN:
@@ -373,7 +351,6 @@ VL53L0X_Error VL53L0X_get_pal_state_string(VL53L0X_State PalStateCode,
 			VL53L0X_STRING_STATE_UNKNOWN);
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
 
@@ -382,7 +359,6 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 		char *pSequenceStepsString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-	LOG_FUNCTION_START("");
 
 	switch (SequenceStepId) {
 	case VL53L0X_SEQUENCESTEP_TCC:
@@ -410,8 +386,6 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 		Status = VL53L0X_ERROR_INVALID_PARAMS;
 	}
 
-	LOG_FUNCTION_END(Status);
-
 	return Status;
 }
 
@@ -420,8 +394,6 @@ VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckI
 	char *pLimitCheckString)
 {
 	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-
-	LOG_FUNCTION_START("");
 
 	switch (LimitCheckId) {
 	case VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE:
@@ -457,6 +429,5 @@ VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckI
 
 	}
 
-	LOG_FUNCTION_END(Status);
 	return Status;
 }
