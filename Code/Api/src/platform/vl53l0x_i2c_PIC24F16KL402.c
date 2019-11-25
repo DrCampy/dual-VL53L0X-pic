@@ -61,34 +61,16 @@ bool _check_min_version(void)
 /*Uses MSSP1 in I2C mode. Speed is 100 kbit*/
 int VL53L0X_i2c_init(void)
 {
-    /*Using standard speed mode*/
-    SSP1STATbits.SMP=1;
-    /*PCIE=0 - No interruption on stop bit detection
-     *SCIE=0 - No interruption on start bit detection
-     *Already set to 0 by default*/
-
-    /*Sets clock divider*/
-    SSP1ADD=0x4F; /* If Fosc = 16MHz*/
+    /*Sets clock divider for 100kHz com*/
+    I2C1BRG = 0x26; /* If Fosc = 16MHz*/
     /*SSP1ADD=0x27; // If Fosc = 8MHz*/
-
-    /*Set TRIS bits
-     *I2C1 uses RB8 (SCL) and RB9 (SDA)
-
-     *SSPEN=1 - Enables serial port and configures SDA1 and SCL1 as the serial port pins
-     *SSPM=1000 I2C master mode.*/
-    SSP1CON1 |= 0b0000000000101000;
     
-    /*
-     I2C1CON register
-     * bit 15 I2CEN = 1 enables module
-     * 
-     */
-
+    I2C1CONLbits.I2CEN = 1; /*enables module*/
     return STATUS_OK;
 }
 int32_t VL53L0X_comms_close(void)
 {
-    SSP1CON1 &= 0b1111111111011111;
+    I2C1CONLbits.I2CEN = 0;
 
     return STATUS_OK;
 }
@@ -96,45 +78,45 @@ int32_t VL53L0X_comms_close(void)
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {
     /*1. Start*/
-    SSP1CON2bits.SEN = 1;
+    I2C1CONLbits.SEN = 1;
 
     /*2. Send address*/
-    SSP1BUF = address;
-    while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+    I2C1TRN = address;
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*3. Check for ack*/
-    if(SSP1CON2bits.ACKSTAT != 0){
+    if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
-        SSP1CON2bits.PEN = 1;
+        I2C1CONLbits.PEN = 1;
         return STATUS_FAIL;
     }
     /*4. Send Index*/
-    SSP1BUF = reg;
-    while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+    I2C1TRN = reg;
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*5. Check for ack*/
-    if(SSP1CON2bits.ACKSTAT != 0){
+    if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
-        SSP1CON2bits.PEN = 1;
+        I2C1CONLbits.PEN = 1;
         return STATUS_FAIL;
     }
 
     uint8_t i = 0;
     for(; i < count; i++){
         /*6. send data*/
-        SSP1BUF = pdata[i];
-        while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+        I2C1TRN = pdata[i];
+        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
         /*Check for ack*/
-        if(SSP1CON2bits.ACKSTAT != 0){
+        if(I2C1STATbits.ACKSTAT != 0){
             /*Error*/
-            SSP1CON2bits.PEN = 1;
+            I2C1CONLbits.PEN = 1;
             return STATUS_FAIL;
         }
     }
 
     /*8. Send stop*/
-    SSP1CON2bits.PEN = 1;
+    I2C1CONLbits.PEN = 1;
 
     return STATUS_OK;
 }
@@ -142,45 +124,45 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
 int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
 {
     /*1. Start*/
-    SSP1CON2bits.SEN = 1;
+    I2C1CONLbits.SEN = 1;
 
     /*2. Send address */
-    SSP1BUF = address;
-    while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+    I2C1TRN = address;
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*3. Check for ack*/
-    if(SSP1CON2bits.ACKSTAT != 0){
+    if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
-        SSP1CON2bits.PEN = 1;
+        I2C1CONLbits.PEN = 1;
         return STATUS_FAIL;
     }
     /*4. Send Index*/
-    SSP1BUF = index;
-    while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+    I2C1TRN = index;
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*5. Check for ack*/
-    if(SSP1CON2bits.ACKSTAT != 0){
+    if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
-        SSP1CON2bits.PEN = 1;
+        I2C1CONLbits.PEN = 1;
         return STATUS_FAIL;
     }
 
     /*6. Enters receiving mode*/
-    SSP1CON2bits.RCEN = 1;
+    I2C1CONLbits.RCEN = 1;
 
     /*7. Send repeated start*/
-    SSP1CON2bits.RSEN = 1;
+    I2C1CONLbits.RSEN = 1;
 
     /*8. Send address + 1 for reading*/
-    SSP1BUF = address+1;
+    I2C1CONL = address+1;
 
-    while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*5. Check for ack*/
-    if(SSP1CON2bits.ACKSTAT != 0){
+    if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
-        SSP1CON2bits.PEN = 1;
-        SSP1CON2bits.RCEN = 0;
+        I2C1CONLbits.PEN = 1;
+        I2C1CONLbits.RCEN = 0;
         return STATUS_FAIL;
     }
 
@@ -188,14 +170,14 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     for(; i < count; i++){
         /*9. gets data*/
         //while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
-        pdata[i] = SSP1BUF;
+        pdata[i] = I2C1RCV;
         /*Sends ack*/
-        SSP1CON2bits.ACKEN = 1;
+        I2C1CONLbits.ACKEN = 1;
     }
 
     /*8. Send stop*/
-    SSP1CON2bits.PEN = 1;
-    SSP1CON2bits.RCEN = 0; /*leaves receive mode*/
+    I2C1CONLbits.PEN = 1;
+    I2C1CONLbits.RCEN = 0; /*leaves receive mode*/
 
     return STATUS_OK;
 }

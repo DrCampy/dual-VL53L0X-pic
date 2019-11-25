@@ -59,7 +59,7 @@ VL53L0X_Error VL53L0X_get_sequence_steps_info(
 VL53L0X_Error VL53L0X_get_limit_check_info(VL53L0X_DEV Dev, uint16_t LimitCheckId,
 	char *pLimitCheckString);
 
-#define USE_EMPTY_STRING
+/*#define USE_EMPTY_STRING*/
 #ifdef USE_EMPTY_STRING
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME                             ""
 	#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS0                         ""

@@ -254,20 +254,8 @@ VL53L0X_Error  VL53L0X_RdDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t *data){
     return Status;
 }
 
-#define VL53L0X_PollingDelay(...) (void)0
 #define VL53L0X_POLLINGDELAY_LOOPNB  250
-/*VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev){
+VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev){
     VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    LOG_FUNCTION_START("");
-
-    const DWORD cTimeout_ms = 1;
-    HANDLE hEvent = CreateEvent(0, TRUE, FALSE, 0);
-    if(hEvent != NULL)
-    {
-        WaitForSingleObject(hEvent,cTimeout_ms);
-    }
-
-    LOG_FUNCTION_END(status);
     return status;
 }
-*/
