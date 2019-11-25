@@ -1,6 +1,7 @@
 (sym_lib_table
   (lib (name distance_sensors)(type Legacy)(uri ${KIPRJMOD}/libraries/distance_sensors.lib)(options "")(descr ""))
-  (lib (name PIC24F16KL402I_SO)(type Legacy)(uri /home/mdiepart/git/dual-VL53L0X-pic/Kicad/libraries/PIC24F16KL402I_SO.lib)(options "")(descr ""))
-  (lib (name PIC24F16KL402_I_SO_sequential)(type Legacy)(uri /home/mdiepart/git/dual-VL53L0X-pic/Kicad/libraries/PIC24F16KL402_I_SO_sequential.lib)(options "")(descr ""))
-  (lib (name PIC24F16KL402-I_SP)(type Legacy)(uri /home/mdiepart/git/dual-VL53L0X-pic/Kicad/libraries/PIC24F16KL402-I_SP.lib)(options "")(descr ""))
+  (lib (name PIC24F16KL402I_SO)(type Legacy)(uri ${KIPRJMOD}/libraries/PIC24F16KL402I_SO.lib)(options "")(descr ""))
+  (lib (name PIC24F16KL402_I_SO_sequential)(type Legacy)(uri ${KIPRJMOD}/libraries/PIC24F16KL402_I_SO_sequential.lib)(options "")(descr ""))
+  (lib (name PIC24F16KL402-I_SP)(type Legacy)(uri ${KIPRJMOD}/PIC24F16KL402-I_SP.lib)(options "")(descr ""))
+  (lib (name PIC24FJ64GA702)(type Legacy)(uri ${KIPRJMOD}/libraries/PIC24FJ64GA702.lib)(options "")(descr ""))
 )
