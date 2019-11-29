@@ -64,7 +64,7 @@
 /*                                                                            */
 /* _INT0Interrupt      _SPI2Interrupt                                         */
 /* _IC1Interrupt       _C1RxRdyInterrupt                                      */
-/* _OC1Interrupt       _C1Interrupt                                           */
+/* _OC1Interrupt       _C1InInterruptThresholdSettingsterrupt                                           */
 /* _T1Interrupt        _DMA3Interrupt                                         */
 /* _DMA0Interrupt      _IC3Interrupt                                          */
 /* _IC2Interrupt       _IC4Interrupt                                          */
@@ -156,3 +156,8 @@
 /******************************************************************************/
 
 /* TODO Add interrupt routine code here. */
+
+void __attribute__((interrupt,auto_psv)) _SI2C2Interrupt(void){
+    
+}
+/*Add interrupt for each sensor*/

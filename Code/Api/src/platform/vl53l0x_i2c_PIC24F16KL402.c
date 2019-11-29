@@ -33,8 +33,12 @@
 #include <time.h>
 
 #include "vl53l0x_platform_log.h"
-
+#include "system.h"
 #include <xc.h>
+
+#define F16MHZ 16000000L
+#define F8MHZ 8000000L
+
 /*
 #ifdef VL53L0X_LOG_ENABLE
 #define trace_print(level, ...) trace_print_module_function(TRACE_MODULE_PLATFORM, level, TRACE_FUNCTION_NONE, ##__VA_ARGS__)
@@ -61,10 +65,14 @@ bool _check_min_version(void)
 /*Uses MSSP1 in I2C mode. Speed is 100 kbit*/
 int VL53L0X_i2c_init(void)
 {
-    /*Sets clock divider for 100kHz com*/
-    I2C1BRG = 0x26; /* If Fosc = 16MHz*/
-    /*SSP1ADD=0x27; // If Fosc = 8MHz*/
     
+#if(FCY == F16MHZ)
+    I2C1BRG = 0x4E; /* If Fosc = 32MHz*/
+#elif(FCY == F8MHZ)
+    I2C1BRG = 0x26; /*If Fosc = 16MHz*/
+#else
+#error I2C not setup for selected FCY frequency.
+#endif
     I2C1CONLbits.I2CEN = 1; /*enables module*/
     return STATUS_OK;
 }

@@ -19,13 +19,18 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
-#include "user.h"          /* User funct/params, such as InitApp              */
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
+#define XSHUT_L 5
+#define XSHUT_R 13
+#define INT_L 12
+#define INT_R 10
+
 /* i.e. uint16_t <variable_name>; */
+
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -33,13 +38,29 @@
 
 int16_t main(void)
 {
-
+    TRISBbits |= (1 << XSHUT_L) + (1 << XSHUT_R);
     /* Configure the oscillator for the device */
     ConfigureOscillator();
 
     /* Initialize IO ports and peripherals */
-    InitApp();
-
+    
+    /*
+     * .X_Shut low for both sensors
+     * .X_Shut_R high
+     * (wait)
+     * .Configure SensorR for 2.8V
+     * .Change adress of right sensor
+     * .X_Shut_L high
+     * (wait)
+     * .Configure sensorL for 2.8V
+     * Init
+     * Check if we have to do  SPAD calibration otherwise loads it
+     * Temp calibration
+     * Check if we need to do offset or xTalk calibration otherwise load them
+     * 
+    */
+    
+    
     /* TODO <INSERT USER APPLICATION CODE HERE> */
 
     while(1)
