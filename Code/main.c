@@ -7,33 +7,25 @@
 #define DIP1 7
 #define DIP2 6
 #define DIP3 5
+
+/*Define needed for the API to use I2C in 2.8V*/
+#define USE_I2C_2V8
+
+
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
-
-/* Device header file */
-#if defined(__XC16__)
-    #include <xc.h>
-#elif defined(__C30__)
-    #if defined(__PIC24E__)
-    	#include <p24Exxxx.h>
-    #elif defined (__PIC24F__)||defined (__PIC24FK__)
-	#include <p24Fxxxx.h>
-    #elif defined(__PIC24H__)
-	#include <p24Hxxxx.h>
-    #endif
-#endif
-
+#include <xc.h>            /* Device header file                              */
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-
 #include "system.h"        /* System funct/params, like osc/peripheral config */
+#include <libpic30.h>      /* __delay_ms function                             */
+#include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
-/* i.e. uint16_t <variable_name>; */
 
 
 /******************************************************************************/
@@ -42,21 +34,34 @@ volatile bool i2c_slave_ready = false;
 
 int16_t main(void)
 {
-    TRISBbits |= (1 << XSHUT_L) + (1 << XSHUT_R);
+    
     /* Configure the oscillator for the device */
     ConfigureOscillator();
-
-    /* Initialize IO ports and peripherals */
+    
+    VL53L0X_Dev_t r, l;
+    VL53L0X_DEV RightSensor = &r, LeftSensor = &l;
+    
+    /*Configure shutdown pins as outputs*/
+    TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
+    
+    /*Wake up right sensor*/
+    LATB = 1 << XSHUT_R;
+    __delay_ms(2);
+    
+    /*VL53L0X_DataInit(VL53L0X_DEV Dev)*/
+    VL53L0X_SetDeviceAddress(RightSensor, 0x54);
+    
+    /*Turns on left sensor*/
+    LATB |= 1 << XSHUT_L;
+    __delay_ms(2);
     
     /*
      * .X_Shut low for both sensors
      * .X_Shut_R high
      * (wait)
-     * .Configure SensorR for 2.8V
      * .Change adress of right sensor
      * .X_Shut_L high
      * (wait)
-     * .Configure sensorL for 2.8V
      * Init
      * Check if we have to do  SPAD calibration otherwise loads it
      * Temp calibration
