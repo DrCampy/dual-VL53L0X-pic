@@ -2,8 +2,6 @@
 At start:
     Shutdown 1 sensor
     change it's address using general call address
-    Shutdown sensor, wake up other one
-    change it's address using general call address
     wake up both sensors
     Calibrate sensor 1
     Calibrate sensor 2
