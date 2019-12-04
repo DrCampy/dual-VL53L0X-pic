@@ -32,7 +32,7 @@
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
-
+volatile bool i2c_slave_ready = false;
 /* i.e. uint16_t <variable_name>; */
 
 
@@ -69,6 +69,9 @@ int16_t main(void)
 
     while(1)
     {
-
+        if(i2c_slave_ready == true){
+            /*Manage slave I2C*/
+            i2c_slave_ready = false;
+        }
     }
 }

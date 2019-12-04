@@ -156,8 +156,11 @@
 /******************************************************************************/
 
 /* TODO Add interrupt routine code here. */
+extern volatile bool i2c_slave_ready;
 
 void __attribute__((interrupt,auto_psv)) _SI2C2Interrupt(void){
-    
+    i2c_slave_ready = true;
 }
+
 /*Add interrupt for each sensor*/
+
