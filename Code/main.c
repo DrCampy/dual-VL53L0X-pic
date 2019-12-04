@@ -1,3 +1,12 @@
+/* Defines bit position for used pins */
+#define XSHUT_L 15
+#define XSHUT_R 12
+#define INT_L 14
+#define INT_R 13
+#define INT_OUT 11
+#define DIP1 7
+#define DIP2 6
+#define DIP3 5
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -23,11 +32,6 @@
 /******************************************************************************/
 /* Global Variable Declaration                                                */
 /******************************************************************************/
-
-#define XSHUT_L 5
-#define XSHUT_R 13
-#define INT_L 12
-#define INT_R 10
 
 /* i.e. uint16_t <variable_name>; */
 
