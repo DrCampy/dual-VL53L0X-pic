@@ -19,6 +19,8 @@ Enable interrupt
 Choose Sampling Frequency
 Change I2C address
 
+NEW: Change distance units (cm / mm /...)
+
 CONFIG1
 BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
 

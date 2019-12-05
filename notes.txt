@@ -1,27 +1,2 @@
-I2C for tof uses I2C1:
-Configuration registers
-
-SSP1STAT = 0b0000 0000 1000 0000 (SSP1STAT.SMP=1 /*If using standard speed mode*/; SSP1STAT.CKE=0)
-
-SSP1CON1 = 0b0000 0000 xx1x 1000 (SSP1CON1.SSPEN=1; SSP1CON1.SSPM=1000) (Master mode, not firmware controlled)
-
-
-SSP1CON3 = 0b0000 0000 x00x xxxx (SSP1CON3.PCIE=0; SSP1CON3.SCIE=0;)
-
-SSP1ADD = 0b0000 0000 abcd efgh
-
-For Fclock = 100kHz :
-If Fosc = 16 MHz
-abcd efgh = 4Fh
-if Fosc = 8MHz
-abcd efgh = 27h
- !! Set TRIS bits for I2C1 pins
-
-Write data to SSPxBUF
-BF = buffer full
-ACKSTAT = flag reset if data acknowledged (data or address) (SSPxCON2<6>)
-Raises SSPxIF
-Wait for new data in SSPxBUF (SSPxSTAT<0>)
-
-Start / Repeated Start :
-set SSPxCON2<0> (SEN) / SSPxCON2.RSEN
+Add an LED to the board.
+Give possibility to enable/disable led with dip switch
