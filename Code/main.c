@@ -4,9 +4,10 @@
 #define INT_L 14
 #define INT_R 13
 #define INT_OUT 11
-#define DIP1 7
-#define DIP2 6
-#define DIP3 5
+
+#define DIP1pin RB5
+#define DIP2pin RB6
+#define DIP3pin RB7
 
 /*Define needed for the API to use I2C in 2.8V*/
 #define USE_I2C_2V8
@@ -37,9 +38,16 @@ int16_t main(void)
     
     /* Configure the oscillator for the device */
     ConfigureOscillator();
-    
+    bool DIPS[3];
+    DIPS[0] = PORTB.DIP1pin;
+    DIPS[1] = PORTB.DIP2pin;
+    DIPS[3] = PORTB.DIP3pin;
     VL53L0X_Dev_t r, l;
     VL53L0X_DEV RightSensor = &r, LeftSensor = &l;
+    VL53L0X_Error StatusL = VL53L0X_ERROR_NONE, StatusR = VL53L0X_ERROR_NONE;
+    
+    RightSensor->I2cDevAddr = 0x52;
+    LeftSensor
     
     /*Configure shutdown pins as outputs*/
     TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
@@ -49,28 +57,49 @@ int16_t main(void)
     __delay_ms(2);
     
     /*VL53L0X_DataInit(VL53L0X_DEV Dev)*/
-    VL53L0X_SetDeviceAddress(RightSensor, 0x54);
+    VL53L0X_SetDeviceAddress(RightSensor, 0x54); /*TODO what if the address was already set ?*/
+    RightSensor
     
     /*Turns on left sensor*/
     LATB |= 1 << XSHUT_L;
     __delay_ms(2);
     
+    StatusR = VL53L0X_DataInit(RightSensor);
+    StatusL = VL53L0X_DataInit(LeftSensor);
+    
+    /*Mainly used for debug, useless once in production ?*/
+    if(!(StatusR == VL53L0X_ERROR_NONE && StatusL == VL53L0X_ERROR_NONE)){
+        /*Do something ?*/
+    }
+    
+    StatusR = VL53L0X_StaticInit(RightSensor);
+    StatusL = VL53L0X_StaticInit(LeftSensor);
+    
+    /*Mainly used for debug, useless once in production ?*/
+    if(!(StatusR == VL53L0X_ERROR_NONE && StatusL == VL53L0X_ERROR_NONE)){
+        /*Do something ?*/
+    }
+    
+    VL53L0X_PerformRefSpadManagement(RightSensor, ..., ...);
+    
     /*
-     * .X_Shut low for both sensors
-     * .X_Shut_R high
-     * (wait)
-     * .Change adress of right sensor
-     * .X_Shut_L high
-     * (wait)
+     * DataInit
+     * StaticInit
+     * PerformRefSpadManagement
+     */
+    
+    /*
+     * .X_Shut_R high V
+     * (wait) V
+     * .Change adress of right sensor V
+     * .X_Shut_L high V
+     * (wait) V
      * Init
      * Check if we have to do  SPAD calibration otherwise loads it
      * Temp calibration
      * Check if we need to do offset or xTalk calibration otherwise load them
      * 
     */
-    
-    
-    /* TODO <INSERT USER APPLICATION CODE HERE> */
 
     while(1)
     {
