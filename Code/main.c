@@ -79,8 +79,20 @@ int16_t main(void)
     if(!(StatusR == VL53L0X_ERROR_NONE && StatusL == VL53L0X_ERROR_NONE)){
         /*Do something ?*/
     }
+    /*
+     * ReferenceSPADManagement
+     * To be performed once after manufacturing especially if cover glass is
+     * used. The resulting data has to be stored on the host.
+     */
+    VL53L0X_PerformReferenceSPADManagement(RightSensor, ..., ...);
+    VL53L0X_PerformRefCaliration();
     
-    VL53L0X_PerformRefSpadManagement(RightSensor, ..., ...);
+    /*White target*/
+    VL53L0X_PerformOffsetCalibration();
+    
+    /*Set grey target*/
+    VL53L0X_PerformXTalkCalibration();
+    
     
     /*
      * DataInit
