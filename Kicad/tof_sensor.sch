@@ -1271,19 +1271,15 @@ Text Label 3550 6750 2    50   ~ 0
 SDA2_LV
 Text Label 3550 6950 2    50   ~ 0
 SCL2_LV
-Text Label 3550 7150 2    50   ~ 0
-SDA2_HV
-Text Label 3550 7350 2    50   ~ 0
-SCL2_HV
 $Comp
 L power:GND #PWR030
 U 1 1 5DEC048A
-P 3550 7550
-F 0 "#PWR030" H 3550 7300 50  0001 C CNN
-F 1 "GND" H 3555 7377 50  0000 C CNN
-F 2 "" H 3550 7550 50  0001 C CNN
-F 3 "" H 3550 7550 50  0001 C CNN
-	1    3550 7550
+P 3550 7150
+F 0 "#PWR030" H 3550 6900 50  0001 C CNN
+F 1 "GND" H 3555 6977 50  0000 C CNN
+F 2 "" H 3550 7150 50  0001 C CNN
+F 3 "" H 3550 7150 50  0001 C CNN
+	1    3550 7150
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1331,36 +1327,14 @@ F 3 "~" H 3750 6950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:TestPoint_Probe TP6
-U 1 1 5DEC430A
+L Connector:TestPoint_Probe TP8
+U 1 1 5DEF33BD
 P 3550 7150
-F 0 "TP6" H 3703 7251 50  0000 L CNN
+F 0 "TP8" H 3703 7251 50  0000 L CNN
 F 1 "TestPoint_Probe" H 3703 7160 50  0000 L CNN
 F 2 "Measurement_Points:Measurement_Point_Round-SMD-Pad_Small" H 3750 7150 50  0001 C CNN
 F 3 "~" H 3750 7150 50  0001 C CNN
 	1    3550 7150
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:TestPoint_Probe TP7
-U 1 1 5DEC45D4
-P 3550 7350
-F 0 "TP7" H 3703 7451 50  0000 L CNN
-F 1 "TestPoint_Probe" H 3703 7360 50  0000 L CNN
-F 2 "Measurement_Points:Measurement_Point_Round-SMD-Pad_Small" H 3750 7350 50  0001 C CNN
-F 3 "~" H 3750 7350 50  0001 C CNN
-	1    3550 7350
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:TestPoint_Probe TP8
-U 1 1 5DEF33BD
-P 3550 7550
-F 0 "TP8" H 3703 7651 50  0000 L CNN
-F 1 "TestPoint_Probe" H 3703 7560 50  0000 L CNN
-F 2 "Measurement_Points:Measurement_Point_Round-SMD-Pad_Small" H 3750 7550 50  0001 C CNN
-F 3 "~" H 3750 7550 50  0001 C CNN
-	1    3550 7550
 	1    0    0    -1  
 $EndComp
 Text Label 4750 6750 2    50   ~ 0
@@ -1371,8 +1345,6 @@ Text Label 4750 6150 2    50   ~ 0
 XSHUT_L
 Text Label 4750 6350 2    50   ~ 0
 INT_L
-Text Label 4750 6950 2    50   ~ 0
-INT_OUT
 $Comp
 L Connector:TestPoint_Probe TP9
 U 1 1 5DF2AF30
@@ -1415,17 +1387,6 @@ F 1 "TestPoint_Probe" H 4903 6760 50  0000 L CNN
 F 2 "Measurement_Points:Test_Point_Keystone_5010-5014_Multipurpose" H 4950 6750 50  0001 C CNN
 F 3 "~" H 4950 6750 50  0001 C CNN
 	1    4750 6750
-	1    0    0    -1  
-$EndComp
-$Comp
-L Connector:TestPoint_Probe TP13
-U 1 1 5DF2C0CF
-P 4750 6950
-F 0 "TP13" H 4903 7051 50  0000 L CNN
-F 1 "TestPoint_Probe" H 4903 6960 50  0000 L CNN
-F 2 "Measurement_Points:Measurement_Point_Round-SMD-Pad_Small" H 4950 6950 50  0001 C CNN
-F 3 "~" H 4950 6950 50  0001 C CNN
-	1    4750 6950
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
