@@ -12,7 +12,6 @@
 /*Define needed for the API to use I2C in 2.8V*/
 #define USE_I2C_2V8
 
-
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
@@ -39,15 +38,26 @@ int16_t main(void)
     /* Configure the oscillator for the device */
     ConfigureOscillator();
     bool DIPS[3];
-    DIPS[0] = PORTB.DIP1pin;
-    DIPS[1] = PORTB.DIP2pin;
-    DIPS[3] = PORTB.DIP3pin;
+    DIPS[0] = PORTB.DIP1pin; /* Calibration Mode */
+    DIPS[1] = PORTB.DIP2pin; /* LED Mode or Calibration Data Management */
+    DIPS[3] = PORTB.DIP3pin; /* Slave I2C address */
     VL53L0X_Dev_t r, l;
     VL53L0X_DEV RightSensor = &r, LeftSensor = &l;
     VL53L0X_Error StatusL = VL53L0X_ERROR_NONE, StatusR = VL53L0X_ERROR_NONE;
     
+    bool calMode, dataReset, ledMode;
+    uint8_t slaveI2CAddress;
+    
+    calMode = DIPS[0];
+    dataReset = calMode && DIPS[1];
+    ledMode = calMode || DIPS[1];
+    if(DIPS[2] == false){
+        slaveI2CAddress = 0x42;
+    }else{
+        slaveI2CAddress = 0x44;
+    }
+    
     RightSensor->I2cDevAddr = 0x52;
-    LeftSensor
     
     /*Configure shutdown pins as outputs*/
     TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
@@ -57,9 +67,10 @@ int16_t main(void)
     __delay_ms(2);
     
     /*VL53L0X_DataInit(VL53L0X_DEV Dev)*/
+    LeftSensor->I2cDevAddr = 0x52;
     VL53L0X_SetDeviceAddress(RightSensor, 0x54); /*TODO what if the address was already set ?*/
-    RightSensor
-    
+    LeftSensor->I2cDevAddr = 0x54;
+
     /*Turns on left sensor*/
     LATB |= 1 << XSHUT_L;
     __delay_ms(2);
