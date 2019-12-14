@@ -5,9 +5,9 @@
     {
       "Vendor":      "KiCad",
       "Application": "Pcbnew",
-      "Version":     "5.0.2+dfsg1-1"
+      "Version":     "(5.1.5)-2"
     },
-    "CreationDate":  "2019-12-13T09:40:21+01:00"
+    "CreationDate":  "2019-12-14T03:39:57+01:00"
   },
   "GeneralSpecs":
   {
@@ -15,12 +15,12 @@
     {
       "Name": "tof_sensor",
       "GUID": "746f665f-7365-46e7-936f-722e6b696361",
-      "Revision": "1.0"
+      "Revision": "rev?"
     },
     "Size":
     {
-      "X": 86.485,
-      "Y": 45.845
+      "X": 86.410,
+      "Y": 45.770
     },
     "LayerNumber": 2,
     "BoardThickness":  1.600
@@ -40,37 +40,37 @@
   "FilesAttributes":
   [
     {
-      "Path":  "tof_sensor-F.Cu.gbr",
+      "Path":  "tof_sensor-F_Cu.gbr",
       "FileFunction":  "Copper,L1,Top",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "tof_sensor-B.Cu.gbr",
+      "Path":  "tof_sensor-B_Cu.gbr",
       "FileFunction":  "Copper,L2,Bot",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "tof_sensor-F.SilkS.gbr",
+      "Path":  "tof_sensor-F_SilkS.gbr",
       "FileFunction":  "Legend,Top",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "tof_sensor-B.SilkS.gbr",
+      "Path":  "tof_sensor-B_SilkS.gbr",
       "FileFunction":  "Legend,Bot",
       "FilePolarity":  "Positive"
     },
     {
-      "Path":  "tof_sensor-F.Mask.gbr",
+      "Path":  "tof_sensor-F_Mask.gbr",
       "FileFunction":  "SolderMask,Top",
       "FilePolarity":  "Negative"
     },
     {
-      "Path":  "tof_sensor-B.Mask.gbr",
+      "Path":  "tof_sensor-B_Mask.gbr",
       "FileFunction":  "SolderMask,Bot",
       "FilePolarity":  "Negative"
     },
     {
-      "Path":  "tof_sensor-Edge.Cuts.gbr",
+      "Path":  "tof_sensor-Edge_Cuts.gbr",
       "FileFunction":  "Profile",
       "FilePolarity":  "Positive"
     }
