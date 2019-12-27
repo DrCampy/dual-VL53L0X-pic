@@ -12,20 +12,19 @@ Ext I2C specs:
 Config register :
 Needed functions:
 Enable/disable
-Enable/disable automatic calibration wrt to temperature changes
 Enable Left
 Enable Right
 Enable interrupt
 Choose Sampling Frequency
 Change I2C address
-
-NEW: Change distance units (cm / mm /...)
+Enable/disable XTalk compensation
+Change distance units (cm / mm /...)
 
 CONFIG1
 BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
 
 
-      auto_cal_en   L_EN      R_EN     INT_EN     <- Sampling Frequency ->
+                    L_EN      R_EN     INT_EN     <- Sampling Frequency ->
 
 Data Registers:
 
