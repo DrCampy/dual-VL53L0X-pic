@@ -1,5 +1,4 @@
-/*Define needed for the API to use I2C in 2.8V*/
-#define USE_I2C_2V8
+
 
 /******************************************************************************/
 /* Files to Include                                                           */
@@ -10,9 +9,9 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include <libpic30.h>
 #include <p24FJ64GA702.h>  /* __delay_ms() function                           */
-#include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
 #include "config.h"        /* Configuration definitions                       */
-
+#include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
+#include "DEEE/Include/DEE Emulation 16-bit/DEE Emulation 16-bit.h"
 
 /******************************************************************************/
 /* Custom Functions, enums,...                                                */
@@ -90,6 +89,9 @@ int16_t main(void)
     
     /*Configure shutdown pins as outputs*/
     TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
+    
+    /* Initialize EEprom Emulator */
+    DataEEInit();
     
     /*Wake up right sensor*/
     LATB = 1 << XSHUT_R;
@@ -272,8 +274,7 @@ int16_t main(void)
                     /*Manage slave I2C*/
                     
                     i2c_slave_ready = false;
-                }
-                
+                } 
             }
     }
 
@@ -294,56 +295,106 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 /****************/
 /*     SPAD     */
 /****************/
+/* Write SPAD calibration data of right sensor to emulated EEPROM */
 void writeRightSPADCalData(uint32_t *refSPADCount, uint8_t *isApertureSPAD){
-    /*TODO*/
+    uint16_t refSPADCountL = *refSPADCount;
+    uint16_t refSPADCountH = *refSPADCount >> 16;
+    DataEEWrite(refSPADCountL, ADD_RSC_R_L);
+    DataEEWrite(refSPADCountH, ADD_RSC_R_H);
+    DataEEWrite(*isApertureSPAD, ADD_IAS_R);
 }
 
+/* Read SPAD calibration data of right sensor from emulated EEPROM */
 void readRightSPADCalData(uint32_t *refSPADCount, uint8_t *isApertureSPAD){
-    /*TODO*/
+    uint16_t refSPADCountL = DataEERead(ADD_RSC_R_L);
+    uint16_t refSPADCountH = DataEERead(ADD_RSC_R_H);
+    *refSPADCount = ((uint32_t)refSPADCountH << 16) + refSPADCountL;
+    *isApertureSPAD = DataEERead(ADD_IAS_R);  
 }
 
+/* Write SPAD calibration data of left sensor to emulated EEPROM */
 void writeLeftSPADCalData(uint32_t *refSPADCount, uint8_t *isApertureSPAD){
-    /*TODO*/
+    uint16_t refSPADCountL = *refSPADCount;
+    uint16_t refSPADCountH = *refSPADCount >> 16;
+    DataEEWrite(refSPADCountL, ADD_RSC_L_L);
+    DataEEWrite(refSPADCountH, ADD_RSC_L_H);
+    DataEEWrite(*isApertureSPAD, ADD_IAS_L);
 }
 
+/* Read SPAD calibration data of left sensor from emulated EEPROM */
 void readLeftSPADCalData(uint32_t *refSPADCount, uint8_t *isApertureSPAD){
-    /*TODO*/
+    uint16_t refSPADCountL = DataEERead(ADD_RSC_L_L);
+    uint16_t refSPADCountH = DataEERead(ADD_RSC_L_H);
+    *refSPADCount = ((uint32_t)refSPADCountH << 16) + refSPADCountL;
+    *isApertureSPAD = DataEERead(ADD_IAS_L); 
 }
 
 /****************/
 /*    OFFSET    */
 /****************/
+/* Write offset calibration data of right sensor to emulated EEPROM */
 void writeRightOffsetCalData(int32_t *offsetMicroMeter){
-    /*TODO*/
+    uint16_t offsetMicroMeterL = *offsetMicroMeter;
+    uint16_t offsetMicroMeterH = *offsetMicroMeter >> 16;
+    DataEEWrite(offsetMicroMeterL, ADD_OMM_R_L);
+    DataEEWrite(offsetMicroMeterH, ADD_OMM_R_H);
 }
 
+/* Read offset calibration data of right sensor from emulated EEPROM */
 void readRightOffsetCalData(int32_t *offsetMicroMeter){
-    /*TODO*/
+    uint16_t offsetMicroMeterL = DataEERead(ADD_OMM_R_L);
+    uint16_t offsetMicroMeterH = DataEERead(ADD_OMM_R_H);
+    *offsetMicroMeter = ((uint32_t)offsetMicroMeterH << 16) + offsetMicroMeterL;
 }
 
+/* Write offset calibration data of left sensor to emulated EEPROM */
 void writeLeftOffsetCalData(int32_t *offsetMicroMeter){
-    /*TODO*/
+    uint16_t offsetMicroMeterL = *offsetMicroMeter;
+    uint16_t offsetMicroMeterH = *offsetMicroMeter >> 16;
+    DataEEWrite(offsetMicroMeterL, ADD_OMM_L_L);
+    DataEEWrite(offsetMicroMeterH, ADD_OMM_L_H);
 }
 
+/* Read offset calibration data of left sensor from emulated EEPROM */
 void readLeftOffsetCalData(int32_t *offsetMicroMeter){
-    /*TODO*/
+    uint16_t offsetMicroMeterL = DataEERead(ADD_OMM_L_L);
+    uint16_t offsetMicroMeterH = DataEERead(ADD_OMM_L_H);
+    *offsetMicroMeter = ((uint32_t)offsetMicroMeterH << 16) + offsetMicroMeterL;
 }
 
 /****************/
 /*     XTALK    */
 /****************/
+/* Write crosstalk calibration data of right sensor to emulated EEPROM */
 void writeRightXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps){
-    /*TODO*/
+    uint16_t xTalkCompensationRateMegaCpsL = *xTalkCompensationRateMegaCps;
+    uint16_t xTalkCompensationRateMegaCpsH = *xTalkCompensationRateMegaCps >> 16;
+    DataEEWrite(xTalkCompensationRateMegaCpsL, ADD_XTCRMC_R_L);
+    DataEEWrite(xTalkCompensationRateMegaCpsH, ADD_XTCRMC_R_H);
 }
 
+/* Read crosstalk calibration data of right sensor from emulated EEPROM */
 void readRightXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps){
-    /*TODO*/
+    uint16_t xTalkCompensationRateMegaCpsL = DataEERead(ADD_XTCRMC_R_L);
+    uint16_t xTalkCompensationRateMegaCpsH = DataEERead(ADD_XTCRMC_R_H);
+    *xTalkCompensationRateMegaCps = 
+            ((FixPoint1616_t)xTalkCompensationRateMegaCpsH << 16)
+            + xTalkCompensationRateMegaCpsL;
 }
 
+/* Write crosstalk calibration data of left sensor to emulated EEPROM */
 void writeLeftXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps){
-    /*TODO*/
+    uint16_t xTalkCompensationRateMegaCpsL = *xTalkCompensationRateMegaCps;
+    uint16_t xTalkCompensationRateMegaCpsH = *xTalkCompensationRateMegaCps >> 16;
+    DataEEWrite(xTalkCompensationRateMegaCpsL, ADD_XTCRMC_L_L);
+    DataEEWrite(xTalkCompensationRateMegaCpsH, ADD_XTCRMC_L_H);
 }
 
+/* Read crosstalk calibration data of left sensor from emulated EEPROM */
 void readLeftXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps){
-    /*TODO*/
+    uint16_t xTalkCompensationRateMegaCpsL = DataEERead(ADD_XTCRMC_L_L);
+    uint16_t xTalkCompensationRateMegaCpsH = DataEERead(ADD_XTCRMC_L_H);
+    *xTalkCompensationRateMegaCps = 
+            ((FixPoint1616_t)xTalkCompensationRateMegaCpsH << 16)
+            + xTalkCompensationRateMegaCpsL;
 }
