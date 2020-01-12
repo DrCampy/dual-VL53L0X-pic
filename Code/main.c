@@ -8,7 +8,6 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include <libpic30.h>
-#include <p24FJ64GA702.h>  /* __delay_ms() function                           */
 #include "config.h"        /* Configuration definitions                       */
 #include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
 #include "DEEE/Include/DEE Emulation 16-bit/DEE Emulation 16-bit.h"
