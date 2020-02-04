@@ -1,2 +1,0 @@
-Add an LED to the board.
-Give possibility to enable/disable led with dip switch
