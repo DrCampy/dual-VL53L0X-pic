@@ -162,7 +162,7 @@ extern volatile bool i2c_slave_ready;
 //IEC3[1] = enabled
 void __attribute__((interrupt,auto_psv)) _SI2C2Interrupt(void){
     i2c_slave_ready = true;
-    IFS3bits[1] = 0; //lower interrupt flag
+    IFS3bits.SI2C2IF = 0; //lower interrupt flag
 }
 
 /*Add interrupt for each sensor*/
