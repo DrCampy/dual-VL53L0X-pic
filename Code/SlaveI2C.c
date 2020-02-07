@@ -37,6 +37,9 @@ void I2CSlaveInit(uint8_t address){
     I2C2CONLbits.I2CEN = 1;
 }
 
+//If master sends NACK after we sent data, the module will not generate interrupt.
+//A stop condition is expected afterwards.
+
 void I2CSlaveExec(){
     bool isAddress = !I2C2STATbits.D_NOT_A;
     bool isRx = I2C2STATbits.R_NOT_W;
@@ -102,7 +105,19 @@ void I2CSlaveExec(){
         
     }else if(!isAddress && !isRx){
         //We just sent data. If autoIncrement enabled we should send next bit
-        
+        if(autoIncrement == true){
+            //Check registers
+            
+            //If we are in distance registers =, automatically cycle between them
+            if(workingRegister >= I2C_RIGHT_L &&
+                    workingRegister <= I2C_MAX_L){
+                workingRegister++;
+                if(workingRegister > I2C_MAX_H){
+                    workingRegister = I2C_RIGHT_L;
+                }
+                I2C2TRN = i2cRegisters[workingRegister];
+            }
+        }
         //TODO
                     
     }
@@ -114,8 +129,20 @@ void I2CSlaveExec(){
 void I2CSlaveSetAddress(uint8_t address){
     //Write address to register
     //Write address to I2C module
-    i2cRegisters[I2C_ADDRESS]
+    i2cRegisters[I2C_ADDRESS] = address;
     I2C2ADD = address;
-    
+}
 
+/*
+ * Returns true if the register reg is a config register.
+ * Otherwise it is a data register which belongs in another "cycle"
+ * and is read-only.
+ */
+bool I2CSlaveIsConfigRegister(uint8_t reg){
+    if(reg >= I2C_CONFIG_L && reg <= I2C_ADDRESS){
+        return true;
+    }else{
+        return false;
+    }
+    
 }

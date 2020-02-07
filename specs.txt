@@ -18,53 +18,42 @@ Enable interrupt
 Choose Sampling Frequency
 Change I2C address
 Enable/disable XTalk compensation
-Change distance units (cm / mm /...)
 
-CONFIG1
-BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+autoIncrement / cycle :
 
+Enabled
+cycles through config registers
+ADDR+R_NOT_W
+cycles through distance registers
 
-                    L_EN      R_EN     INT_EN     <- Sampling Frequency ->
+Disabled
+    Config:
+        Write to/returns one config register at a time
+        Writing:
+            ADDR+R_NOT_W - Reg - Data[reg] - Reg - Data[reg] - P
+        Reading : 
+            ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg] - RS - ADDR+R_NOT_W - Reg - ADDR+R_NOT_W - Data[reg] - P
+    
+    Distance:
+        Returns one distance at a time
+        Reading:
+            ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](L) - Data[reg+1](H) - RS - ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](H) - P
+            Sensor will respond with 2 bytes if reading L part register (L followed by H), 1 byte if reading H register)
+        Writing:
+            Not allowed.
 
-Data Registers:
-
-Left sensor
-Right sensor
-Minimal Value
-Maximal value
-
-Left sensor
-BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
-
-<-
-                    Distance detected by left sensor
-                                                                        ->
-
-BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
-
-Right sensor
-BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
-
-<-
-                    Distance detected by right sensor
-                                                                        ->
-
-BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
-
-Minimal value
-BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
-
-<-
-                    Distance min(right, left)
-                                                                        ->
-
-BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
-
-Maximal value
-BIT15     BIT14     BIT13     BIT12     BIT11     BIT10     BIT9      BIT8
-
-<-
-                    distance Max(right, left)
-                                                                        ->
-
-BIT7      BIT6      BIT5      BIT4      BIT3      BIT2      BIT1      BIT0
+            
+Enabled
+    Config:
+        Write to/returns config registers by cycling through them.
+        Writing:
+            ADDR+R_NOT_W - Reg - Data[reg] - Data[reg+1] - Data[reg+2] - Data[reg] - ... - P //Cycles through the config registers, ommiting data registers
+        Reading : 
+            ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg] - Data[reg+1] - Data[reg+2] - ... - P //Cycles through the config registers, ommiting data registers
+            
+    Distance:
+        Returns distances one after the other.
+        Reading : 
+            ADDR+W - Reg - RS - ADDR+R - Data[reg](H) - Data[reg+1](L) - Data[reg+2]_H - Data[reg+3]_L - P
+        Writing:
+            Not allowed.
