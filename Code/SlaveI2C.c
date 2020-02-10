@@ -47,79 +47,82 @@ void I2CSlaveExec(){
     
     //Check for collision or so
     
-    if(isAddress && isRx){
-        //Do nothing. Next interrupt will give us some registers address
-        state = WAITING_REGISTER; //update internal state
-        
-        //Acknowledge
-        I2C2CONLbits.ACKDT = 0; //ACK
-        I2C2CONLbits.SCLREL = 1; //Release SCL line
-        
-    }else if(isAddress && !isRx){
-        //Received our address. We have to send requested data.
-        state = SENDING_DATA; //update internal state
-        I2C2TRN = i2cRegisters[workingRegister]; //Transmits the requested value
-        
-    }else if(!isAddress && isRx){
-        //Receiving data. First one is register, next one is data.
-        //If auto increment is ON, we will first receive a register then datas.
-        //If auto increment is OFF we will receive a register then a data then
-        //a register again and so on.
-        
-        //While receiving data, STREN should be 0 to automatically
-        //wait and hold SCL. (Check SCLREL ?)
-        if(state == WAITING_REGISTER){
-            uint8_t temp = I2C2RCV;
-            if(temp < 0 || temp > I2C_LAST_ADD){
-                //Invalid register, NACK
-                I2C2CONLbits.ACKDT = 1; //NACK
-                I2C2CONLbits.SCLREL = 1; //Release SCL
-            }else{
-                workingRegister = I2C2RCV;
-                state = RECEIVING_DATA;
-            }
-        }else{ //Receiving data
-            //Check if we are in a writable register
-            if(workingRegister <= I2C_ADDRESS){
-                i2cRegisters[workingRegister] = I2C2RCV;
-                if(workingRegister == I2C_CONFIG_L){
-                    //Todo update according to registers
-                }else if(workingRegister == I2C_CONFIG_H){
-                    //Todo implements but unused for now...
-                }else if(workingRegister == I2C_ADDRESS){
-                    I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
-                }
-                I2C2CONLbits.ACKDT = 0; //Ack
-                
-                //Auto increment
-                if(autoIncrement == true){
-                    workingRegister = (workingRegister+1)%I2C_ADDRESS;
-                }
-            }else{
-                //Trying to write to read only register.
-                I2C2CONLbits.ACKDT = 1; //Nack
-            }
-            I2C2CONLbits.SCLREL = 1; //Release scl
+    if(isAddress){//Received our address
+        if(isRx){
+            //we are receiving (ADD<0> = 0)
+            //Next interrupt will give us some registers address
+            state = WAITING_REGISTER; //update internal state
+
+            //Acknowledge
+            I2C2CONLbits.ACKDT = 0; //ACK
+            I2C2CONLbits.SCLREL = 1; //Release SCL line
+        }else{
+            //we are transmitting (ADD<0> = 1)
+            //We have to send requested data.
+            state = SENDING_DATA; //update internal state
+            I2C2TRN = i2cRegisters[workingRegister]; //Transmits the requested value
         }
-        
-        
-    }else if(!isAddress && !isRx){
-        //We just sent data. If autoIncrement enabled we should send next bit
-        if(autoIncrement == true){
-            //Check registers
-            
-            //If we are in distance registers =, automatically cycle between them
-            if(workingRegister >= I2C_RIGHT_L &&
-                    workingRegister <= I2C_MAX_L){
-                workingRegister++;
-                if(workingRegister > I2C_MAX_H){
-                    workingRegister = I2C_RIGHT_L;
+    }else{//Received / transmitted data
+        if(isRx){
+            //Receiving (ADD<0> = 0)
+            //First one is register, next one is data
+            //If auto increment is ON, we will first receive a register then datas.
+            //If auto increment is OFF we will receive a register then a data then
+            //a register again and so on.
+
+            //While receiving data, STREN should be 0 to automatically
+            //wait and hold SCL. (Check SCLREL ?)
+            if(state == WAITING_REGISTER){
+                uint8_t temp = I2C2RCV;
+                if(temp < 0 || temp > I2C_LAST_ADD){
+                    //Invalid register, NACK
+                    I2C2CONLbits.ACKDT = 1; //NACK
+                    I2C2CONLbits.SCLREL = 1; //Release SCL
+                }else{
+                    workingRegister = I2C2RCV;
+                    state = RECEIVING_DATA;
                 }
-                I2C2TRN = i2cRegisters[workingRegister];
+            }else{ //Receiving data
+                //Check if we are in a writable register
+                if(workingRegister <= I2C_ADDRESS){
+                    i2cRegisters[workingRegister] = I2C2RCV;
+                    if(workingRegister == I2C_CONFIG_L){
+                        //Todo update according to registers
+                    }else if(workingRegister == I2C_CONFIG_H){
+                        //Todo implements but unused for now...
+                    }else if(workingRegister == I2C_ADDRESS){
+                        I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
+                    }
+                    I2C2CONLbits.ACKDT = 0; //Ack
+
+                    //Auto increment
+                    if(autoIncrement == true){
+                        workingRegister = (workingRegister+1)%I2C_ADDRESS;
+                    }
+                }else{
+                    //Trying to write to read only register.
+                    I2C2CONLbits.ACKDT = 1; //Nack
+                }
+                I2C2CONLbits.SCLREL = 1; //Release scl
             }
+        }else{
+            //Transmitting (ADD<0> = 1)
+            //We just sent data. If autoIncrement enabled we should send next bit
+            if(autoIncrement == true){
+                //Check registers
+
+                //If we are in distance registers =, automatically cycle between them
+                if(workingRegister >= I2C_RIGHT_L &&
+                        workingRegister <= I2C_MAX_L){
+                    workingRegister++;
+                    if(workingRegister > I2C_MAX_H){
+                        workingRegister = I2C_RIGHT_L;
+                    }
+                    I2C2TRN = i2cRegisters[workingRegister];
+                }
+            }
+            //TODO
         }
-        //TODO
-                    
     }
     
     i2c_slave_ready = false;
