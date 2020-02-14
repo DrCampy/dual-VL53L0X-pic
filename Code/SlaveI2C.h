@@ -20,8 +20,10 @@
 #define     I2C_MIN_H               0x08
 #define     I2C_MAX_L               0x09
 #define     I2C_MAX_H               0x0A
+#define     I2C_AVG_L               0x0B
+#define     I2C_AVG_H               0x0C
 
-#define     I2C_LAST_ADD            I2C_MAX_L
+#define     I2C_LAST_ADD            I2C_AVG_H
 #define     I2C_NB_REGISTERS        I2C_LAST_ADD+1
 
 #endif	/* SLAVEI2C_H */

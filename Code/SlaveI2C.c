@@ -9,7 +9,13 @@
 #include <stdbool.h>
 #include "SlaveI2C.h"
 
-void I2CSlaveSetAddress(uint8_t address);
+void    I2CSlaveSetAddress      (uint8_t address);
+uint8_t I2CSlaveGetByte         ();
+void    I2CSlaveSendByte        (uint8_t data);
+void    I2CSlaveAck             ();
+void    I2CSlaveNack            ();
+int8_t  I2CSlaveIsLowRegister   (uint8_t reg);
+uint8_t I2CSlaveNextRegister    (bool autoIncrement, bool reg);
 
 typedef enum{
     IDLE,
@@ -18,10 +24,10 @@ typedef enum{
     RECEIVING_DATA
 } State;
 
-int i2cRegisters[I2C_NB_REGISTERS];
+int     i2cRegisters[I2C_NB_REGISTERS];
+bool    autoIncrement;
+State   state = IDLE;
 extern volatile bool i2c_slave_ready;
-bool autoIncrement;
-State state = IDLE;
 
 void I2CSlaveInit(uint8_t address){
     /* Sets address */
@@ -54,13 +60,12 @@ void I2CSlaveExec(){
             state = WAITING_REGISTER; //update internal state
 
             //Acknowledge
-            I2C2CONLbits.ACKDT = 0; //ACK
-            I2C2CONLbits.SCLREL = 1; //Release SCL line
+            I2CSlaveAck();
         }else{
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
             state = SENDING_DATA; //update internal state
-            I2C2TRN = i2cRegisters[workingRegister]; //Transmits the requested value
+            I2CSlaveSendByte(i2cRegisters[workingRegister]); //Transmits the requested value
         }
     }else{//Received / transmitted data
         if(isRx){
@@ -76,10 +81,10 @@ void I2CSlaveExec(){
                 uint8_t temp = I2C2RCV;
                 if(temp < 0 || temp > I2C_LAST_ADD){
                     //Invalid register, NACK
-                    I2C2CONLbits.ACKDT = 1; //NACK
-                    I2C2CONLbits.SCLREL = 1; //Release SCL
+                    I2CSlaveNack();
                 }else{
-                    workingRegister = I2C2RCV;
+                    //We received the internal register the master wants to address.
+                    workingRegister = I2CSlaveGetByte();
                     state = RECEIVING_DATA;
                 }
             }else{ //Receiving data
@@ -147,5 +152,121 @@ bool I2CSlaveIsConfigRegister(uint8_t reg){
     }else{
         return false;
     }
+    
+}
+
+/*
+ * Reads a byte from the I2C bus.
+ */
+uint8_t I2CSlaveGetByte(){
+    return I2C2RCV;
+}
+
+/*
+ * Sends the content of data on the I2C bus
+ */
+void I2CSlaveSendByte(uint8_t data){
+    I2C2TRN = data;
+}
+
+/*
+ * Send Ack bit to transmitter
+ */
+void I2CSlaveAck(){
+    I2C2CONLbits.ACKDT = 0; //ACK
+    I2C2CONLbits.SCLREL = 1; //Release SCL
+}
+
+/*
+ * Sends Nack bit to transmitter.
+ */
+void I2CSlaveNack(){
+    I2C2CONLbits.ACKDT = 1; //NACK
+    I2C2CONLbits.SCLREL = 1; //Release SCL
+}
+
+/*
+ * Returns the next register starting from reg.
+ * Accounts for Config/Non-config registers and auto incrementation.
+ */
+uint8_t I2CSlaveNextRegister(bool autoIncrement, bool reg){
+    
+    // If the register is a config register we loop accross them
+    if(I2CSlaveIsConfigRegister(reg)){
+        if(autoIncrement == false){
+            return reg;
+        }else{
+            reg++;
+            if(reg > I2C_ADDRESS){
+                reg=I2C_CONFIG_L;
+            }
+        }
+    }
+    //If the register is a distance register we loop accross them
+    else{
+        if(autoIncrement == false){
+            if(I2CSlaveIsLowRegister(reg) == 1){
+                return reg+1;
+            }else if(I2CSlaveIsLowRegister(reg) == 0){
+                return reg-1;
+            }
+        }else{
+            reg++;
+            if(reg > I2C_AVG_H){
+                reg = I2C_RIGHT_L;
+            }
+        }
+        
+    }
+}
+    
+/*
+ * Checks if the register is a LOW part of an existing register.
+ * 
+ * Returns 1 if it is.
+ * Returns 0 if it is not.
+ * Returns -1 if the register is only one byte.
+ */
+int8_t I2CSlaveIsLowRegister(uint8_t reg){
+    if(reg == I2C_CONFIG_L || reg == I2C_RIGHT_L ||
+            reg == I2C_LEFT_L || reg == I2C_MIN_L ||
+            reg == I2C_MAX_L || reg == I2C_AVG_L){
+        return 1;
+    }else if(reg == I2C_ADDRESS){
+        return -1;
+    }else{
+        return 0;
+    }
+ }
+
+/*
+ * Apply the new config to the device.
+ * Structure of config_l:
+ * L_EN    R_EN    XTALK    AUTO_INC    cont_mode    l_conv    r_conv    UNUSED
+ * 
+ * L_EN: Left sensor enabled (true/false)
+ * R_EN: Right sensor enabled (true/false)
+
+ * XTALK: Crosstalk compensation enabled (true/false)
+ * Auto_INC: auto incrementation of I2C registers enabled (true/false)
+ * 
+ * Structure of config_h:
+ * INT_MODE    DURATION<0:5>
+ * 
+ * INT_MODE<0:1>:
+ *      11: reserved
+ *      10: Raise interrupt at each sensor update
+ *      01: Raise interrupt once both sensors have been updated
+ *      00: Interrupts disabled
+ * 
+ * DURATION<0:5>:
+ * Determines the max duration allocated to each measurement.
+ * Final duration is:
+ * 20ms + DURATION<0:5>ms
+ * Ranges from 20ms to 84ms
+ * 
+ */
+
+void I2CSlaveApplyNewConfig(uint8_t config_l, uint8_t config_h){
     
 }
