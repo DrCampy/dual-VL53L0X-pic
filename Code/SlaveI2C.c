@@ -9,13 +9,17 @@
 #include <stdbool.h>
 #include "SlaveI2C.h"
 
-void    I2CSlaveSetAddress      (uint8_t address);
-uint8_t I2CSlaveGetByte         ();
-void    I2CSlaveSendByte        (uint8_t data);
-void    I2CSlaveAck             ();
-void    I2CSlaveNack            ();
-int8_t  I2CSlaveIsLowRegister   (uint8_t reg);
-uint8_t I2CSlaveNextRegister    (bool autoIncrement, bool reg);
+void    I2CSlaveSetAddress          (uint8_t address);
+bool    I2CSlaveIsConfigRegister    (uint8_t reg);
+bool    I2CSlaveIsRegisterWritable  (uint8_t reg);
+uint8_t I2CSlaveGetByte             ();
+void    I2CSlaveSendByte            (uint8_t data);
+void    I2CSlaveAck                 ();
+void    I2CSlaveNack                ();
+int8_t  I2CSlaveIsLowRegister       (uint8_t reg);
+uint8_t I2CSlaveNextRegister        (bool reg);
+bool    I2CSlaveIsRegisterValid     (uint8_t reg);
+void    I2CSlaveApplyNewConfig      (uint8_t config_l, uint8_t config_h);
 
 typedef enum{
     IDLE,
@@ -66,67 +70,59 @@ void I2CSlaveExec(){
             //We have to send requested data.
             state = SENDING_DATA; //update internal state
             I2CSlaveSendByte(i2cRegisters[workingRegister]); //Transmits the requested value
+            workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
         }
     }else{//Received / transmitted data
         if(isRx){
-            //Receiving (ADD<0> = 0)
-            //First one is register, next one is data
-            //If auto increment is ON, we will first receive a register then datas.
-            //If auto increment is OFF we will receive a register then a data then
-            //a register again and so on.
-
-            //While receiving data, STREN should be 0 to automatically
-            //wait and hold SCL. (Check SCLREL ?)
+            /*Receiving (ADD<0> = 0)
+             * First one is register, next one is data
+             * If auto increment is ON, we will first receive a register then datas.
+             * If auto increment is OFF we will receive a register then a data then
+             * a register again and so on.
+             */
             if(state == WAITING_REGISTER){
-                uint8_t temp = I2C2RCV;
-                if(temp < 0 || temp > I2C_LAST_ADD){
-                    //Invalid register, NACK
-                    I2CSlaveNack();
-                }else{
+                uint8_t temp = I2CSlaveGetByte();
+                if(I2CSlaveIsRegisterValid(temp)){
                     //We received the internal register the master wants to address.
-                    workingRegister = I2CSlaveGetByte();
+                    workingRegister = temp;
                     state = RECEIVING_DATA;
+                    I2CSlaveAck();
+                }else{
+                    I2CSlaveNack();
                 }
             }else{ //Receiving data
-                //Check if we are in a writable register
-                if(workingRegister <= I2C_ADDRESS){
-                    i2cRegisters[workingRegister] = I2C2RCV;
-                    if(workingRegister == I2C_CONFIG_L){
-                        //Todo update according to registers
-                    }else if(workingRegister == I2C_CONFIG_H){
-                        //Todo implements but unused for now...
-                    }else if(workingRegister == I2C_ADDRESS){
-                        I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
-                    }
-                    I2C2CONLbits.ACKDT = 0; //Ack
-
-                    //Auto increment
-                    if(autoIncrement == true){
-                        workingRegister = (workingRegister+1)%I2C_ADDRESS;
-                    }
+                uint8_t data = I2CSlaveGetByte();
+                if(workingRegister == I2C_CONFIG_L){
+                    //Todo update according to registers
+                }else if(workingRegister == I2C_CONFIG_H){
+                    //TODO
+                }else if(workingRegister == I2C_ADDRESS){
+                    I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
+                    i2cRegisters[workingRegister] = data;
+                }/*else we are in a read only register. Acknowledges but does
+                  * nothing.
+                  */
+                
+                /*
+                 * If autoIncrement enabled we will still be receiving data.
+                 * If not we will be receiving the address of the next register
+                 * to work with.
+                 */
+                if(autoIncrement == true){
+                    workingRegister = I2CSlaveNextRegister(workingRegister);
                 }else{
-                    //Trying to write to read only register.
-                    I2C2CONLbits.ACKDT = 1; //Nack
+                    state = WAITING_REGISTER;
                 }
-                I2C2CONLbits.SCLREL = 1; //Release scl
+                I2CSlaveAck(); //Acknowledges
             }
         }else{
             //Transmitting (ADD<0> = 1)
-            //We just sent data. If autoIncrement enabled we should send next bit
-            if(autoIncrement == true){
-                //Check registers
-
-                //If we are in distance registers =, automatically cycle between them
-                if(workingRegister >= I2C_RIGHT_L &&
-                        workingRegister <= I2C_MAX_L){
-                    workingRegister++;
-                    if(workingRegister > I2C_MAX_H){
-                        workingRegister = I2C_RIGHT_L;
-                    }
-                    I2C2TRN = i2cRegisters[workingRegister];
-                }
-            }
-            //TODO
+            //First byte was sent immediately after we have been addressed.
+            //We only have to continue the transmission.
+            I2CSlaveSendByte(i2cRegisters[workingRegister]);
+            
+            //Selects next register
+            workingRegister = I2CSlaveNextRegister(workingRegister); 
         }
     }
     
@@ -153,6 +149,10 @@ bool I2CSlaveIsConfigRegister(uint8_t reg){
         return false;
     }
     
+}
+
+bool I2CSlaveIsRegisterWritable(uint8_t reg){
+    return I2CSlaveIsConfigRegister(reg);
 }
 
 /*
@@ -189,7 +189,7 @@ void I2CSlaveNack(){
  * Returns the next register starting from reg.
  * Accounts for Config/Non-config registers and auto incrementation.
  */
-uint8_t I2CSlaveNextRegister(bool autoIncrement, bool reg){
+uint8_t I2CSlaveNextRegister(bool reg){
     
     // If the register is a config register we loop accross them
     if(I2CSlaveIsConfigRegister(reg)){
@@ -215,9 +215,10 @@ uint8_t I2CSlaveNextRegister(bool autoIncrement, bool reg){
             if(reg > I2C_AVG_H){
                 reg = I2C_RIGHT_L;
             }
+            return reg;
         }
-        
     }
+    return 0x00;
 }
     
 /*
@@ -266,7 +267,13 @@ int8_t I2CSlaveIsLowRegister(uint8_t reg){
  * Ranges from 20ms to 84ms
  * 
  */
-
 void I2CSlaveApplyNewConfig(uint8_t config_l, uint8_t config_h){
     
+}
+
+bool I2CSlaveIsRegisterValid(uint8_t reg){
+    if(reg <= I2C_LAST_ADD){
+        return true;
+    }
+    return false;
 }
