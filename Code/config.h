@@ -53,7 +53,8 @@ extern "C" {
 #define ADD_XTCRMC_R_H  0x0B    /*xTalkCompensationRateMegaCps  right high is   0x0B */
 #define ADD_XTCRMC_L_L  0x0C    /*xTalkCompensationRateMegaCps  left low is     0x0C */
 #define ADD_XTCRMC_L_H  0x0D    /*xTalkCompensationRateMegaCps  left high is    0x0D */
-    
+#define ADD_I2C_ADD     0x0E    /*Slave I2C address is 0x0E*/ 
+   
 #ifdef	__cplusplus
 }
 #endif
