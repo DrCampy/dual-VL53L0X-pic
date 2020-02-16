@@ -7,17 +7,20 @@ At start:
     Calibrate sensor 2
 
 
-Ext I2C specs:
-
 Config register :
-Needed functions:
-Enable/disable
+
 Enable Left
 Enable Right
-Enable interrupt
-Choose Sampling Frequency
-Change I2C address
 Enable/disable XTalk compensation
+Enable/Disable internal auto increments
+Enable/Disable continuous measurement mode
+Start conversion
+Conversion finished flag
+
+Interrupt mode (2 bits)
+Duration of measurement (6 bits)
+
+Change I2C address
 
 autoIncrement / cycle :
 
