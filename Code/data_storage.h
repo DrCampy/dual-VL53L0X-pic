@@ -30,7 +30,8 @@ void writeRightXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps);
 void readRightXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps);
 void writeLeftXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps);
 void readLeftXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps);
-
+void writeI2CSlaveAddress(uint8_t *address);
+void readI2CSlaveAddress(uint8_t *address);
 
 #ifdef	__cplusplus
 }

@@ -113,12 +113,12 @@ void readLeftXTalkCalData(FixPoint1616_t *xTalkCompensationRateMegaCps){
 /*    ADDRESS   */
 /****************/
 /* Write I2C slave address to emulated EEPROM */
-void writeI2CAddress(uint8_t *address){
+void writeI2CSlaveAddress(uint8_t *address){
     DataEEWrite(*address, ADD_I2C_ADD);
 }
 
 /* Read I2C slave address from emulated EEPROM */
-void readI2CAddress(uint8_t *address){
+void readI2CSlaveAddress(uint8_t *address){
     uint16_t address_16 = DataEERead(ADD_I2C_ADD);
     *address = (uint8_t) address_16;
 }
