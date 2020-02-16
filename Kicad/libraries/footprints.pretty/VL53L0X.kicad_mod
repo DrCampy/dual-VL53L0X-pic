@@ -1,4 +1,4 @@
-(module VL53L0X (layer F.Cu) (tedit 5DEC3887)
+(module VL53L0X (layer F.Cu) (tedit 5E4992B4)
   (fp_text reference REF** (at 5.08 15.24) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
@@ -26,4 +26,9 @@
   (pad 10 smd rect (at -1.6 0.8) (size 0.5 0.5) (layers F.Cu F.Paste F.Mask))
   (pad 11 smd rect (at -1.6 0) (size 0.5 0.5) (layers F.Cu F.Paste F.Mask))
   (pad 12 smd rect (at -0.8 0) (size 0.5 0.5) (layers F.Cu F.Paste F.Mask))
+  (model ${KIPRJMOD}/libraries/footprints.pretty/VL53L0X.STEP
+    (offset (xyz -0.85 -1.6 0.34))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 90 180 90))
+  )
 )
