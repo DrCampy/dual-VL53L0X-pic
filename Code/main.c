@@ -4,13 +4,15 @@
 /* Files to Include                                                           */
 /******************************************************************************/
 #include <xc.h>            /* Device header file                              */
-#include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
-#include <libpic30.h>
 #include "config.h"        /* Configuration definitions                       */
+#include <libpic30.h>
 #include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
+#include "data_storage.h"
 #include "DEEE/Include/DEE Emulation 16-bit/DEE Emulation 16-bit.h"
+#include "sensor.h"
+#include "SlaveI2C.h"
 
 /******************************************************************************/
 /* Custom Functions, enums,...                                                */
@@ -24,7 +26,7 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
-
+bool i2cSecondaryAddress = false;
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -36,26 +38,44 @@ int16_t main(void)
     /* Configure the oscillator for the device */
     ConfigureOscillator();
     
+    /* Initialize EEprom Emulator */
+    DataEEInit();
+    
     bool DIPS[3];
     DIPS[0] = PORTBbits.DIP1pin; /* Calibration Mode */
     DIPS[1] = PORTBbits.DIP2pin; /* LED Mode or Calibration Data Management */
-    DIPS[3] = PORTBbits.DIP3pin; /* Slave I2C address */
+    DIPS[2] = PORTBbits.DIP3pin; /* Slave I2C address */
     VL53L0X_Dev_t r, l;
     VL53L0X_DEV RightSensor = &r, LeftSensor = &l; /*Sensors handles*/
     VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,\
                   StatusR = VL53L0X_ERROR_NONE; /*Sensors satuses */
-    
-    bool ledMode;
     uint8_t slaveI2CAddress;
     Mode currentMode = RUN;
+    
+    /* 
+     * Uses General call address so devices are always reconfigured
+     * independently of their previous configuration
+     * If their address was changed by a previous config it may
+     * otherwise cause problems.
+     */
+    LeftSensor->I2cDevAddr = 0x00; 
+    RightSensor->I2cDevAddr = 0x00;
+    
+    bool ledMode;
+
     
     if(DIPS[0] == false){ /*We are in run mode*/
         currentMode = RUN;
         ledMode = DIPS[1];
         if(DIPS[2] == false){
-            slaveI2CAddress = PRIM_SLAVE_I2C_ADDR;
+            readI2CSlaveAddress(&slaveI2CAddress);
+            if(GetaddrNotFound()){
+                //Address not found in memory. Using default
+                slaveI2CAddress = PRIM_SLAVE_I2C_ADDR;
+            }
         }else{
             slaveI2CAddress = SEC_SLAVE_I2C_ADDR;
+            i2cSecondaryAddress = true;
         }
     }else if(DIPS[1] == false){ /*We are in a calibration mode*/
         if(DIPS[2] == false){
@@ -70,34 +90,28 @@ int16_t main(void)
             currentMode = RST;
         }
     }
-    
+
     /*Configures LED pin. Led pin is RB4*/
     TRISBbits.TRISB4 = 0;
     
     /*Configure shutdown pins as outputs*/
     TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
     
-    /* Initialize EEprom Emulator */
-    DataEEInit();
-    
-    /*Wake up right sensor*/
-    LATB = 1 << XSHUT_R;
-    __delay_ms(2);
-    
-    /*VL53L0X_DataInit(VL53L0X_DEV Dev)*/
-    LeftSensor->I2cDevAddr = 0x00; 
-    /* Uses General call address so this device is always reconfigured
-     * independently of it's previous configuration
-     * Because we do not know if the address change is persistant.
-     */
+    /*Configure right sensor address*/
+    powerOnRightSensor(); /*Wake up right sensor*/
+    __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(RightSensor, 0x54);
-    LeftSensor->I2cDevAddr = 0x54;
+    RightSensor->I2cDevAddr = 0x54;
+    powerOffRightSensor();
 
-    /*Turns on left sensor*/
-    LATB |= 1 << XSHUT_L;
-    __delay_ms(2);
-    RightSensor->I2cDevAddr = 0x52;
-
+    /*Configure left sensor address*/
+    powerOnLeftSensor(); /*Wake up left sensor*/
+    __delay_ms(2); /* sensor needs 2 ms to wake up */
+    VL53L0X_SetDeviceAddress(LeftSensor, 0x52);
+    LeftSensor->I2cDevAddr = 0x52;
+    
+    powerOnRightSensor();
+    
     StatusR = VL53L0X_DataInit(RightSensor);
     StatusL = VL53L0X_DataInit(LeftSensor);
     
@@ -119,6 +133,8 @@ int16_t main(void)
             __delay_ms(1000);
         }
     }
+    
+    /* Calibration data variables */
     uint32_t refSPADCountR = 0, refSPADCountL = 0;
     uint8_t isApertureSPADR = 0, isApertureSPADL = 0;
     uint8_t vhvSettings, phaseCal; /*These variables are useless to us but required by the api*/
@@ -253,13 +269,14 @@ int16_t main(void)
             while(1){}
             break;
             
-        case RUN: ;
-            while(1){
+        case RUN:
+            I2CSlaveInit(slaveI2CAddress);
             
+            /*Main loop*/
+            while(1){
                 if(i2c_slave_ready == true){
-                    
-                    /*Manage slave I2C*/
-                    
+                    /*Manage slave I2C*/    
+                    I2CSlaveExec();
                     i2c_slave_ready = false;
                 } 
             }
