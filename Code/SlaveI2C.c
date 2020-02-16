@@ -8,6 +8,8 @@
 #include <xc.h>
 #include <stdbool.h>
 #include "SlaveI2C.h"
+#include "sensor.h"
+#include "data_storage.h"
 
 void    I2CSlaveSetAddress          (uint8_t address);
 bool    I2CSlaveIsConfigRegister    (uint8_t reg);
@@ -19,7 +21,8 @@ void    I2CSlaveNack                ();
 int8_t  I2CSlaveIsLowRegister       (uint8_t reg);
 uint8_t I2CSlaveNextRegister        (bool reg);
 bool    I2CSlaveIsRegisterValid     (uint8_t reg);
-void    I2CSlaveApplyNewConfig      (uint8_t config_l, uint8_t config_h);
+
+extern bool i2cSecondaryAddress;
 
 typedef enum{
     IDLE,
@@ -31,7 +34,6 @@ typedef enum{
 int     i2cRegisters[I2C_NB_REGISTERS];
 bool    autoIncrement;
 State   state = IDLE;
-extern volatile bool i2c_slave_ready;
 
 void I2CSlaveInit(uint8_t address){
     /* Sets address */
@@ -92,10 +94,25 @@ void I2CSlaveExec(){
                 }
             }else{ //Receiving data
                 uint8_t data = I2CSlaveGetByte();
-                if(workingRegister == I2C_CONFIG_L){
-                    //Todo update according to registers
+                if(workingRegister == I2C_CONFIG_L){                    
+                    /* Ensures the CONV_FINISHED flag stays intact*/
+                    bool conv_finished = i2cRegisters[workingRegister]
+                                            & CONV_FINISHED;
+                    if(conv_finished == true){
+                        data |= CONV_FINISHED;
+                    }else{
+                        data &= !CONV_FINISHED;
+                    }
+                    i2cRegisters[workingRegister] = data;
+                    applyConfigL(data);
+                    if((data & 0b00010000) != 0){
+                        autoIncrement = true;
+                    }else{
+                        autoIncrement = false;
+                    }
                 }else if(workingRegister == I2C_CONFIG_H){
-                    //TODO
+                    i2cRegisters[workingRegister] = data;
+                    applyConfigH(data);
                 }else if(workingRegister == I2C_ADDRESS){
                     I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
                     i2cRegisters[workingRegister] = data;
@@ -124,17 +141,22 @@ void I2CSlaveExec(){
             //Selects next register
             workingRegister = I2CSlaveNextRegister(workingRegister); 
         }
-    }
-    
-    i2c_slave_ready = false;
-    
+    }    
 }
 
 void I2CSlaveSetAddress(uint8_t address){
     //Write address to register
-    //Write address to I2C module
     i2cRegisters[I2C_ADDRESS] = address;
+
+    //Write address to I2C module
     I2C2ADD = address;
+    
+    //If we use the secondary i2c address mode we should not save it to
+    // flash memory
+    if(i2cSecondaryAddress == false){
+        //Write address to flash memory
+        writeI2CSlaveAddress(&address);
+    }
 }
 
 /*
@@ -241,36 +263,9 @@ int8_t I2CSlaveIsLowRegister(uint8_t reg){
  }
 
 /*
- * Apply the new config to the device.
- * Structure of config_l:
- * L_EN    R_EN    XTALK    AUTO_INC    cont_mode    l_conv    r_conv    UNUSED
- * 
- * L_EN: Left sensor enabled (true/false)
- * R_EN: Right sensor enabled (true/false)
-
- * XTALK: Crosstalk compensation enabled (true/false)
- * Auto_INC: auto incrementation of I2C registers enabled (true/false)
- * 
- * Structure of config_h:
- * INT_MODE    DURATION<0:5>
- * 
- * INT_MODE<0:1>:
- *      11: reserved
- *      10: Raise interrupt at each sensor update
- *      01: Raise interrupt once both sensors have been updated
- *      00: Interrupts disabled
- * 
- * DURATION<0:5>:
- * Determines the max duration allocated to each measurement.
- * Final duration is:
- * 20ms + DURATION<0:5>ms
- * Ranges from 20ms to 84ms
- * 
+ * Returns true if reg is an existing register.
+ * Returns false otherwise.
  */
-void I2CSlaveApplyNewConfig(uint8_t config_l, uint8_t config_h){
-    
-}
-
 bool I2CSlaveIsRegisterValid(uint8_t reg){
     if(reg <= I2C_LAST_ADD){
         return true;
