@@ -26,13 +26,24 @@ void powerOnLeftSensor(){
 /*
  * Apply the new config to the device.
  * Structure of config_l:
- * L_EN    R_EN    XTALK    AUTO_INC    cont_mode    l_conv    r_conv    UNUSED
+ * L_EN    R_EN    XTALK    AUTO_INC    CONT_MODE    CONV    FINISHED    UNUSED
  * 
  * L_EN: Left sensor enabled (true/false)
  * R_EN: Right sensor enabled (true/false)
 
  * XTALK: Crosstalk compensation enabled (true/false)
- * Auto_INC: auto incrementation of I2C registers enabled (true/false)
+ * 
+ * AUTO_INC: auto incrementation of I2C registers enabled (true/false)
+ * 
+ * CONT_MODE: If 1 the sensor will take measurements continuously once CONV is 
+ *              set to 1.
+ *            If 0 the sensor will perform one measurement with each enabled
+ *              sensor once CONV is set to 1. CONV is set back to 0 after measurements.
+ * 
+ * CONV: Start conversion. In case CONT_MODE = 1, starts measurements until
+ *        CONV is set back to 0 again.
+ * 
+ * CONV_FINISHED: Set to 1 once mea
  * 
  * Structure of config_h:
  * INT_MODE    DURATION<0:5>
