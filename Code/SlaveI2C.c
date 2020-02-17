@@ -104,7 +104,7 @@ void I2CSlaveExec(){
                         data &= !CONV_FINISHED;
                     }
                     i2cRegisters[workingRegister] = data;
-                    applyConfigL(data);
+                    setConfigL(data);
                     if((data & 0b00010000) != 0){
                         autoIncrement = true;
                     }else{
@@ -112,7 +112,7 @@ void I2CSlaveExec(){
                     }
                 }else if(workingRegister == I2C_CONFIG_H){
                     i2cRegisters[workingRegister] = data;
-                    applyConfigH(data);
+                    setConfigH(data);
                 }else if(workingRegister == I2C_ADDRESS){
                     I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
                     i2cRegisters[workingRegister] = data;
