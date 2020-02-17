@@ -15,6 +15,7 @@ extern "C" {
 #define L_EN            0b10000000
 #define R_EN            0b01000000
 #define XTALK           0b00100000
+#define AUTO_INC        0b00010000
 #define CONT_MODE       0b00001000
 #define CONV            0b00000100
 #define CONV_FINISHED   0b00000010
@@ -23,7 +24,7 @@ extern "C" {
     bool L_ENflag = 1;
     bool R_ENflag = 1;
     bool XTALKflag = 0;
-        bool CONT_MODEflag;
+    bool AUTO_INCflag = 0;
     bool CONT_MODEflag = 0;
     bool CONVflag = 0;
     bool CONV_FINISHEDflag = 0;
