@@ -17,7 +17,7 @@
 /******************************************************************************/
 /* Custom Functions, enums,...                                                */
 /******************************************************************************/
-typedef enum {RUN, RST, SPAD, OFFSET, XTALK} Mode;
+typedef enum {RUN, RST, SPAD_CAL, OFFSET_CAL, XTALK_CAL} Mode;
 void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
     uint16_t msBetweenBlinks);
 
@@ -79,13 +79,13 @@ int16_t main(void)
         }
     }else if(DIPS[1] == false){ /*We are in a calibration mode*/
         if(DIPS[2] == false){
-            currentMode = SPAD;
+            currentMode = SPAD_CAL;
         }else{
-            currentMode = OFFSET;
+            currentMode = OFFSET_CAL;
         }
     }else{
         if(DIPS[2] == false){
-            currentMode = XTALK;
+            currentMode = XTALK_CAL;
         }else{
             currentMode = RST;
         }
@@ -142,7 +142,7 @@ int16_t main(void)
     FixPoint1616_t xTalkCompensationRateMegaCpsR = 0,\
                    xTalkCompensationRateMegaCpsL = 0;
     switch(currentMode){
-        case SPAD: ;
+        case SPAD_CAL: ;
             /*Lights LED to tell the user the calibration will begin*/
             blinkStatusLed(2, 1000, 500); /*2 blinks of 1s, 0.5s apart*/
             
@@ -164,7 +164,7 @@ int16_t main(void)
             LATBbits.LATB4 = 0;
             while(1){}
             break;
-        case OFFSET: ;            
+        case OFFSET_CAL: ;            
             /*Loads SPAD calibration data*/
             readRightSPADCalData(&refSPADCountR, &isApertureSPADR);
             readLeftSPADCalData(&refSPADCountL, &isApertureSPADL);
@@ -199,7 +199,7 @@ int16_t main(void)
             while(1){}
             break;
             
-        case XTALK: ;
+        case XTALK_CAL: ;
             /*Loads SPAD calibration data*/
             readRightSPADCalData(&refSPADCountR, &isApertureSPADR);
             readLeftSPADCalData(&refSPADCountL, &isApertureSPADL);
