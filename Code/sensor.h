@@ -19,20 +19,19 @@ extern "C" {
 #define CONV            0b00000100
 #define CONV_FINISHED   0b00000010
     
-    typedef struct{
-        /*Config low register*/
-        bool L_ENflag;
-        bool R_ENflag;
-        bool XTALKflag;
+    /*Config low register*/
+    bool L_ENflag = 1;
+    bool R_ENflag = 1;
+    bool XTALKflag = 0;
         bool CONT_MODEflag;
-        bool CONV_FINISHEDflag;
-        
-        /*Config high register*/
-        uint8_t INT_MODEflags; /* 2 bits */
-        uint8_t DURATIONval; /* 6 bits */
-        
-    }internal_state;
-    
+    bool CONT_MODEflag = 0;
+    bool CONVflag = 0;
+    bool CONV_FINISHEDflag = 0;
+
+    /*Config high register*/
+    uint8_t INT_MODEflags; /* 2 bits */
+    uint8_t DURATIONval; /* 6 bits */
+            
     void powerOffRightSensor();
     void powerOnRightSensor();
     void powerOffLeftSensor();
