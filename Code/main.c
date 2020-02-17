@@ -27,6 +27,7 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
 bool i2cSecondaryAddress = false;
+VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -46,7 +47,7 @@ int16_t main(void)
     DIPS[1] = PORTBbits.DIP2pin; /* LED Mode or Calibration Data Management */
     DIPS[2] = PORTBbits.DIP3pin; /* Slave I2C address */
     VL53L0X_Dev_t r, l;
-    VL53L0X_DEV RightSensor = &r, LeftSensor = &l; /*Sensors handles*/
+    RightSensor = &r; LeftSensor = &l; /*Sensors handles*/
     VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,\
                   StatusR = VL53L0X_ERROR_NONE; /*Sensors satuses */
     uint8_t slaveI2CAddress;
