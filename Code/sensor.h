@@ -2,7 +2,7 @@
  * File:   sensor.h
  * Author: Morgan Diepart
  *
- * Created on 15 fï¿½vrier 2020, 01:21
+ * Created on 15 février 2020, 01:21
  */
 
 #ifndef SENSOR_H
@@ -18,6 +18,20 @@ extern "C" {
 #define CONT_MODE       0b00001000
 #define CONV            0b00000100
 #define CONV_FINISHED   0b00000010
+    
+    typedef struct{
+        /*Config low register*/
+        bool L_ENflag;
+        bool R_ENflag;
+        bool XTALKflag;
+        bool CONT_MODEflag;
+        bool CONV_FINISHEDflag;
+        
+        /*Config high register*/
+        uint8_t INT_MODEflags; /* 2 bits */
+        uint8_t DURATIONval; /* 6 bits */
+        
+    }internal_state;
     
     void powerOffRightSensor();
     void powerOnRightSensor();
