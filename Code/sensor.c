@@ -1,8 +1,11 @@
 #include <xc.h>
 #include <stdbool.h>
-
+#include "Api/inc/core/vl53l0x_api.h"
 #include "config.h"
 #include "sensor.h"
+
+extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+
 
 void powerOffRightSensor(){
     LATB &= !(1 << XSHUT_R);
@@ -62,7 +65,12 @@ void applyConfigL(uint8_t config_l){
         powerOffRightSensor();
     }
     
-    //XTALK Flag
+    //XTALK Flad
+    if(config_l &= XTALK != 0){
+        enableXTalk();
+    }else{
+        disableXTalk();
+    }
     
     //CONT_MODE flag
     
@@ -72,4 +80,14 @@ void applyConfigL(uint8_t config_l){
 
 void applyConfigH(uint8_t config_l){
     
+}
+
+void enableXTalk(){
+    VL53L0X_SetXTalkCompensationEnable(RightSensor, 1);
+    VL53L0X_SetXTalkCompensationEnable(LeftSensor, 1);
+}
+
+void disableXTalk(){
+    VL53L0X_SetXTalkCompensationEnable(RightSensor, 0);
+    VL53L0X_SetXTalkCompensationEnable(LeftSensor, 0);    
 }
