@@ -20,19 +20,31 @@ extern "C" {
 #define CONV            0b00000100
 #define CONV_FINISHED   0b00000010
     
+#include "Api/inc/core/vl53l0x_api.h"
+    extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+
     /*Config low register*/
-    bool L_ENflag = 1;
-    bool R_ENflag = 1;
-    bool XTALKflag = 0;
-    bool AUTO_INCflag = 0;
-    bool CONT_MODEflag = 0;
-    bool CONVflag = 0;
-    bool CONV_FINISHEDflag = 0;
+    extern bool L_ENflag;
+    extern bool R_ENflag;
+    extern bool XTALKflag;
+    extern bool AUTO_INCflag;
+    extern bool CONT_MODEflag;
+    extern bool CONVflag;
+    extern bool CONV_FINISHEDflag;
 
     /*Config high register*/
-    uint8_t INT_MODEflags; /* 2 bits */
-    uint8_t DURATIONval; /* 6 bits */
-            
+    extern uint8_t INT_MODEflags; /* 2 bits */
+    extern uint8_t DURATIONval; /* 6 bits */
+    
+    /* Distances */
+    extern uint8_t leftL, leftH;
+    extern uint8_t rightL, rightH;
+    extern uint8_t *minL, *minH;
+    //minL = &leftL; minH = &leftH;
+    extern uint8_t *maxL, *maxH;
+    //maxL = &rightL; maxH = &rightH;
+    
+    
     void powerOffRightSensor();
     void powerOnRightSensor();
     void powerOffLeftSensor();

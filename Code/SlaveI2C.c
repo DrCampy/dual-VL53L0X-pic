@@ -23,6 +23,8 @@ uint8_t I2CSlaveNextRegister        (bool reg);
 bool    I2CSlaveIsRegisterValid     (uint8_t reg);
 
 extern bool i2cSecondaryAddress;
+extern bool L_ENflag, R_ENflag, XTALKflag, AUTO_INCflag, CONT_MODEflag, 
+        CONVflag, CONV_FINISHEDflag;
 
 typedef enum{
     IDLE,

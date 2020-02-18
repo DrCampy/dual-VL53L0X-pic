@@ -4,8 +4,27 @@
 #include "config.h"
 #include "sensor.h"
 
-extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+/*Config low register*/
+bool L_ENflag = 1;
+bool R_ENflag = 1;
+bool XTALKflag = 0;
+bool AUTO_INCflag = 0;
+bool CONT_MODEflag = 0;
+bool CONVflag = 0;
+bool CONV_FINISHEDflag = 0;
 
+/*Config high register*/
+uint8_t INT_MODEflags = 00; /* 2 bits */
+uint8_t DURATIONval; /* 6 bits */
+
+/* Distances */
+uint8_t leftL = 0, leftH = 0;
+uint8_t rightL = 0, rightH = 0;
+uint8_t *minL, *minH;
+//minL = &leftL; minH = &leftH;
+uint8_t *maxL, *maxH;
+//maxL = &rightL; maxH = &rightH;
 
 void powerOffRightSensor(){
     LATB &= !(1 << XSHUT_R);

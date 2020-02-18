@@ -27,7 +27,7 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
 bool i2cSecondaryAddress = false;
-VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
 /******************************************************************************/
 /* Main Program                                                               */
