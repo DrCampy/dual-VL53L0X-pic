@@ -121,3 +121,39 @@ void disableXTalk(){
     VL53L0X_SetXTalkCompensationEnable(RightSensor, 0);
     VL53L0X_SetXTalkCompensationEnable(LeftSensor, 0);    
 }
+
+uint8_t getConfigL(){
+    uint8_t configL = 0;
+    if(L_ENflag){
+        configL += L_EN;
+    }
+    if(R_ENflag){
+        configL += R_EN;
+    }
+    if(XTALKflag){
+        configL += XTALK;
+    }
+    if(AUTO_INCflag){
+        configL += AUTO_INC;
+    }
+    if(CONT_MODEflag){
+        configL += CONT_MODE;
+    }
+    if(CONVflag){
+        configL += CONV;
+    }
+    if(CONV_FINISHEDflag){
+        configL += CONV_FINISHED;
+    }
+    
+    return configL;
+}
+
+uint8_t getConfigH(){
+    uint8_t configH = 0;
+    
+    configH += (INT_MODEflags & 0b00000011) << 6;
+    configH += (DURATIONval & 0b00111111);
+    
+    return configH;
+}

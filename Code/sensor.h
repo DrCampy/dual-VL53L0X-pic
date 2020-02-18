@@ -2,7 +2,7 @@
  * File:   sensor.h
  * Author: Morgan Diepart
  *
- * Created on 15 fï¿½vrier 2020, 01:21
+ * Created on 15 février 2020, 01:21
  */
 
 #ifndef SENSOR_H
@@ -55,6 +55,9 @@ extern "C" {
     
     void disableXTalk();
     void enableXTalk();
+    
+    uint8_t getConfigL();
+    uint8_t getConfigH();
 
 #ifdef	__cplusplus
 }
