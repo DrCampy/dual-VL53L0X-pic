@@ -61,7 +61,7 @@ void powerOnLeftSensor(){
  * Ranges from 20ms to 84ms
  * 
  */
-void applyConfigL(uint8_t config_l){
+void setConfigL(uint8_t config_l){
     // L_EN flag
     if(config_l &= L_EN != 0){
         powerOnLeftSensor();
@@ -89,7 +89,7 @@ void applyConfigL(uint8_t config_l){
     
 }
 
-void applyConfigH(uint8_t config_l){
+void setConfigH(uint8_t config_l){
     
 }
 
