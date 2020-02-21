@@ -21,10 +21,12 @@ void    I2CSlaveNack                ();
 int8_t  I2CSlaveIsLowRegister       (uint8_t reg);
 uint8_t I2CSlaveNextRegister        (bool reg);
 bool    I2CSlaveIsRegisterValid     (uint8_t reg);
+uint8_t I2CSlaveGetRegister         (uint8_t address);
+void    I2CSlaveSetRegister         (uint8_t address, uint8_t data);
 
 extern bool i2cSecondaryAddress;
-extern bool L_ENflag, R_ENflag, XTALKflag, AUTO_INCflag, CONT_MODEflag, 
-        CONVflag, CONV_FINISHEDflag;
+//extern bool L_ENflag, R_ENflag, XTALKflag, AUTO_INCflag, CONT_MODEflag, 
+//        CONVflag, CONV_FINISHEDflag;
 
 typedef enum{
     IDLE,
@@ -33,7 +35,7 @@ typedef enum{
     RECEIVING_DATA
 } State;
 
-int     i2cRegisters[I2C_NB_REGISTERS];
+//int     i2cRegisters[I2C_NB_REGISTERS];
 bool    autoIncrement;
 State   state = IDLE;
 
@@ -73,7 +75,7 @@ void I2CSlaveExec(){
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
             state = SENDING_DATA; //update internal state
-            I2CSlaveSendByte(i2cRegisters[workingRegister]); //Transmits the requested value
+            I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
             workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
         }
     }else{//Received / transmitted data
@@ -114,7 +116,7 @@ void I2CSlaveExec(){
             //Transmitting (ADD<0> = 1)
             //First byte was sent immediately after we have been addressed.
             //We only have to continue the transmission.
-            I2CSlaveSendByte(i2cRegisters[workingRegister]);
+            I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister));
             
             //Selects next register
             workingRegister = I2CSlaveNextRegister(workingRegister); 
@@ -123,9 +125,6 @@ void I2CSlaveExec(){
 }
 
 void I2CSlaveSetAddress(uint8_t address){
-    //Write address to register
-    i2cRegisters[I2C_ADDRESS] = address;
-
     //Write address to I2C module
     I2C2ADD = address;
     
@@ -135,6 +134,8 @@ void I2CSlaveSetAddress(uint8_t address){
         //Write address to flash memory
         writeI2CSlaveAddress(&address);
     }
+    
+    I2C_ADDRESSvalue = address;
 }
 
 /*
@@ -226,4 +227,56 @@ bool I2CSlaveIsRegisterValid(uint8_t reg){
         return true;
     }
     return false;
+}
+
+void I2CSlaveSetRegister(uint8_t address, uint8_t data){
+    switch(address){
+        case I2C_CONFIG_L:
+            setConfigL(data);
+            break;
+        case I2C_CONFIG_H:
+            setConfigH(data);
+            break;
+        case I2C_ADDRESS:
+            I2CSlaveSetAddress(data);
+            break;
+        default:
+            /*Non-writable register*/
+            break;
+    }
+    
+}
+
+uint8_t I2CSlaveGetRegister(uint8_t address){
+    switch(address){
+        case I2C_CONFIG_L:
+            return getConfigL();
+            break;
+        case I2C_CONFIG_H:
+            return getConfigH();
+            break;
+        case I2C_ADDRESS:
+            return I2C_ADDRESSvalue;
+            break;
+        case I2C_RIGHT:
+            return rightDist;
+            break;
+        case I2C_LEFT:
+            return leftDist;
+            break;
+        case I2C_MIN:
+            return *minDist;
+            break;
+        case I2C_MAX:
+            return *maxDist;
+            break;
+        case I2C_AVG:
+            return avgDist;
+            break;
+        default:
+            /*Unknown register*/
+            break;
+    }
+    
+    return 0;
 }
