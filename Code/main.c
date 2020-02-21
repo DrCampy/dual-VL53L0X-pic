@@ -26,6 +26,8 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
+volatile bool isLeftReady = false, isRightReady = false;
+
 bool i2cSecondaryAddress = false;
 extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
@@ -52,6 +54,12 @@ int16_t main(void)
                   StatusR = VL53L0X_ERROR_NONE; /*Sensors satuses */
     uint8_t slaveI2CAddress;
     Mode currentMode = RUN;
+    
+    /* Sensors Interrupts config register */
+    //RB13 = INT_R = RP13 = INT2
+    //RB14 = INT_L = RP14 = INT3
+    RPINR1 = 0xDE;
+
     
     /* 
      * Uses General call address so devices are always reconfigured
@@ -273,6 +281,9 @@ int16_t main(void)
         case RUN:
             I2CSlaveInit(slaveI2CAddress);
             
+            //Enable interrupts for slave I2C and both sensors
+            IEC3bits.SI2C2IE = 1;
+            IEC3bits.INT3IE = 1;
             /*Main loop*/
             while(1){
                 if(i2c_slave_ready == true){
