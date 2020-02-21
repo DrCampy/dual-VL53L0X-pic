@@ -5,6 +5,10 @@
 #include "sensor.h"
 
 VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+
+/* Config Updated flag */
+bool CONFIG_UPDATEDflag = 1;
+
 /*Config low register*/
 bool L_ENflag = 1;
 bool R_ENflag = 1;
@@ -83,34 +87,34 @@ void powerOnLeftSensor(){
  */
 void setConfigL(uint8_t config_l){
     // L_EN flag
-    if(config_l &= L_EN != 0){
-        powerOnLeftSensor();
-    }else{
-        powerOffLeftSensor();
-    }
+    L_ENflag = (config_l &= L_EN) != 0;
     
     //R_EN flag
-    if(config_l &= R_EN != 0){
-        powerOnRightSensor();
-    }else{
-        powerOffRightSensor();
-    }
+    R_ENflag = (config_l &= R_EN) != 0;
     
-    //XTALK Flad
-    if(config_l &= XTALK != 0){
-        enableXTalk();
-    }else{
-        disableXTalk();
-    }
+    //XTALK Flag
+    XTALKflag = (config_l &= XTALK) != 0;
+    
+    //AUTO_INT flag
+    AUTO_INCflag = (config_l &= AUTO_INC) != 0;
     
     //CONT_MODE flag
+    CONT_MODEflag = (config_l &= CONT_MODE) != 0;
     
     //CONV_FLAG
+    CONVflag = (config_l &= CONV) != 0;
     
+    CONFIG_UPDATEDflag = true;
 }
 
-void setConfigH(uint8_t config_l){
+void setConfigH(uint8_t config_h){
+    //INT_MODE flags
+    INT_MODEflags = (config_h & 0b11000000) >> 6;
     
+    //DURATION value
+    DURATIONval = (config_h & 0b00111111) >> 6;
+
+    CONFIG_UPDATEDflag = true;
 }
 
 void enableXTalk(){
@@ -157,4 +161,49 @@ uint8_t getConfigH(){
     configH += (DURATIONval & 0b00111111);
     
     return configH;
+}
+
+void updateConfig(){
+    if(CONFIG_UPDATEDflag == false){
+        return; //COnfig was not updated since last execution
+    }
+    // L_EN flag
+    if(L_ENflag){
+        powerOnLeftSensor();
+    }else{
+        powerOffLeftSensor();
+    }
+    
+    //R_EN flag
+    if(R_ENflag){
+        powerOnRightSensor();
+    }else{
+        powerOffRightSensor();
+    }
+    
+    //XTALK Flag
+    if(XTALKflag){
+        enableXTalk();
+    }else{
+        disableXTalk();
+    }
+    
+    //CONT_MODE flag
+    if(CONT_MODEflag){
+
+    }else{
+
+    }
+    
+    //CONV_FLAG
+    if(CONVflag){
+
+    }else{
+
+    }
+
+    //DURATION
+    uint32_t totDuration = 1000*(20+DURATIONval*3);
+    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
+    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
 }

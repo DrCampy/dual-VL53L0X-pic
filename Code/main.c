@@ -280,6 +280,8 @@ int16_t main(void)
                     I2CSlaveExec();
                     i2c_slave_ready = false;
                 } 
+                
+                updateConfig();
             }
     }
 

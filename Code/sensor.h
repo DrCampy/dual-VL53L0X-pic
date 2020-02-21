@@ -21,8 +21,12 @@ extern "C" {
 #define CONV_FINISHED   0b00000010
     
 #include "Api/inc/core/vl53l0x_api.h"
+    
     extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
+    /* Config Updated flag */
+    extern bool CONFIG_UPDATEDflag;
+    
     /*Config low register*/
     extern bool L_ENflag;
     extern bool R_ENflag;
@@ -45,7 +49,6 @@ extern "C" {
     extern uint8_t *minDist;
     extern uint8_t *maxDist;
     
-    
     void powerOffRightSensor();
     void powerOnRightSensor();
     void powerOffLeftSensor();
@@ -60,6 +63,7 @@ extern "C" {
     uint8_t getConfigL();
     uint8_t getConfigH();
 
+    void updateConfig();
 #ifdef	__cplusplus
 }
 #endif
