@@ -18,13 +18,14 @@ bool CONV_FINISHEDflag = 0;
 uint8_t INT_MODEflags = 00; /* 2 bits */
 uint8_t DURATIONval; /* 6 bits */
 
+uint8_t I2C_ADDRESSvalue;
+
 /* Distances */
-uint8_t left = 0;
-uint8_t right = 0;
-uint8_t *min;
-//minL = &leftL; minH = &leftH;
-uint8_t *max;
-//maxL = &rightL; maxH = &rightH;
+uint8_t leftDist = 0;
+uint8_t rightDist = 0;
+uint8_t avgDist = 0;
+uint8_t *minDist;
+uint8_t *maxDist;
 
 void powerOffRightSensor(){
     LATB &= !(1 << XSHUT_R);
