@@ -2,7 +2,7 @@
  * File:   sensor.h
  * Author: Morgan Diepart
  *
- * Created on 15 février 2020, 01:21
+ * Created on 15 fï¿½vrier 2020, 01:21
  */
 
 #ifndef SENSOR_H
@@ -37,11 +37,11 @@ extern "C" {
     extern uint8_t DURATIONval; /* 6 bits */
     
     /* Distances */
-    extern uint8_t leftL, leftH;
-    extern uint8_t rightL, rightH;
-    extern uint8_t *minL, *minH;
+    extern uint8_t left;
+    extern uint8_t right;
+    extern uint8_t *min;
     //minL = &leftL; minH = &leftH;
-    extern uint8_t *maxL, *maxH;
+    extern uint8_t *max;
     //maxL = &rightL; maxH = &rightH;
     
     

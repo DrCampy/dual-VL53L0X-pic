@@ -35,9 +35,7 @@ Disabled
     Distance:
         Returns one distance at a time
         Reading:
-            ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](L) - Data[reg+1](H) - RS - ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](H) - P
-            //Sensor will respond with 2 bytes if reading L part register (L followed by H), 1 byte if reading H register)
-            //If trying to read more than the expected number of bytes the sensor will cycle through the H and L registers of each distance.
+            ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data - RS - ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data - P
         Writing:
             Not allowed.
 
@@ -53,40 +51,6 @@ Enabled
     Distance:
         Returns distances one after the other.
         Reading :
-            ADDR+W - Reg - RS - ADDR+R - Data[reg](H) - Data[reg+1](L) - Data[reg+2]_H - Data[reg+3]_L - P //Cycle through the distance registers, ommiting config registers
+            ADDR+W - Reg - RS - ADDR+R - Data[reg] - Data[reg+1] - Data[reg+2] - Data[reg+3] - P //Cycle through the distance registers, ommiting config registers
         Writing:
             Not allowed.
-
-===========================================================================================================
-Disabled
-    Config:
-        No-AutoInc
-            Write to/returns one config register at a time
-            Writing:
-                ADDR+R_NOT_W - Reg - Data[reg] - Reg - Data[reg] - P
-            Reading :
-                ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg] - RS - ADDR+R_NOT_W - Reg - ADDR+R_NOT_W - Data[reg] - P //If trying to read more than one register the sensor will repeat the data in that register.
-        AutoInc
-            Write to/returns config registers by cycling through them.
-            Writing:
-                ADDR+R_NOT_W - Reg - Data[reg] - Data[reg+1] - Data[reg+2] - Data[reg] - ... - P //Cycles through the config registers, ommiting distance registers
-            Reading :
-                ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg] - Data[reg+1] - Data[reg+2] - ... - P //Cycles through the config registers, ommiting distance registers
-
-
-
-    Distance:
-        no-AutoInc
-            Returns one distance at a time
-            Reading:
-                ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](L) - Data[reg+1](H) - RS - ADDR+R_NOT_W - Reg - RS - ADDR+R_NOT_W - Data[reg](H) - P
-                //Sensor will respond with 2 bytes if reading L part register (L followed by H), 1 byte if reading H register)
-                //If trying to read more than the expected number of bytes the sensor will cycle through the H and L registers of each distance.
-            Writing:
-                Not allowed.
-        AutoInc
-            Returns distances one after the other.
-            Reading :
-                ADDR+W - Reg - RS - ADDR+R - Data[reg](H) - Data[reg+1](L) - Data[reg+2]_H - Data[reg+3]_L - P //Cycle through the distance registers, ommiting config registers
-            Writing:
-                Not allowed.

@@ -19,11 +19,11 @@ uint8_t INT_MODEflags = 00; /* 2 bits */
 uint8_t DURATIONval; /* 6 bits */
 
 /* Distances */
-uint8_t leftL = 0, leftH = 0;
-uint8_t rightL = 0, rightH = 0;
-uint8_t *minL, *minH;
+uint8_t left = 0;
+uint8_t right = 0;
+uint8_t *min;
 //minL = &leftL; minH = &leftH;
-uint8_t *maxL, *maxH;
+uint8_t *max;
 //maxL = &rightL; maxH = &rightH;
 
 void powerOffRightSensor(){

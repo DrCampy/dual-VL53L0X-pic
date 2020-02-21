@@ -96,38 +96,14 @@ void I2CSlaveExec(){
                 }
             }else{ //Receiving data
                 uint8_t data = I2CSlaveGetByte();
-                if(workingRegister == I2C_CONFIG_L){                    
-                    /* Ensures the CONV_FINISHED flag stays intact*/
-                    bool conv_finished = i2cRegisters[workingRegister]
-                                            & CONV_FINISHED;
-                    if(conv_finished == true){
-                        data |= CONV_FINISHED;
-                    }else{
-                        data &= !CONV_FINISHED;
-                    }
-                    i2cRegisters[workingRegister] = data;
-                    setConfigL(data);
-                    if((data & 0b00010000) != 0){
-                        autoIncrement = true;
-                    }else{
-                        autoIncrement = false;
-                    }
-                }else if(workingRegister == I2C_CONFIG_H){
-                    i2cRegisters[workingRegister] = data;
-                    setConfigH(data);
-                }else if(workingRegister == I2C_ADDRESS){
-                    I2CSlaveSetAddress(i2cRegisters[I2C_ADDRESS]);
-                    i2cRegisters[workingRegister] = data;
-                }/*else we are in a read only register. Acknowledges but does
-                  * nothing.
-                  */
+                I2CSlaveSetRegister(workingRegister, data);
                 
                 /*
                  * If autoIncrement enabled we will still be receiving data.
                  * If not we will be receiving the address of the next register
                  * to work with.
                  */
-                if(autoIncrement == true){
+                if(AUTO_INCflag == true){
                     workingRegister = I2CSlaveNextRegister(workingRegister);
                 }else{
                     state = WAITING_REGISTER;
@@ -229,40 +205,17 @@ uint8_t I2CSlaveNextRegister(bool reg){
     //If the register is a distance register we loop accross them
     else{
         if(autoIncrement == false){
-            if(I2CSlaveIsLowRegister(reg) == 1){
-                return reg+1;
-            }else if(I2CSlaveIsLowRegister(reg) == 0){
-                return reg-1;
-            }
+            return reg;
         }else{
             reg++;
-            if(reg > I2C_AVG_H){
-                reg = I2C_RIGHT_L;
+            if(reg > I2C_AVG){
+                reg = I2C_RIGHT;
             }
             return reg;
         }
     }
     return 0x00;
 }
-    
-/*
- * Checks if the register is a LOW part of an existing register.
- * 
- * Returns 1 if it is.
- * Returns 0 if it is not.
- * Returns -1 if the register is only one byte.
- */
-int8_t I2CSlaveIsLowRegister(uint8_t reg){
-    if(reg == I2C_CONFIG_L || reg == I2C_RIGHT_L ||
-            reg == I2C_LEFT_L || reg == I2C_MIN_L ||
-            reg == I2C_MAX_L || reg == I2C_AVG_L){
-        return 1;
-    }else if(reg == I2C_ADDRESS){
-        return -1;
-    }else{
-        return 0;
-    }
- }
 
 /*
  * Returns true if reg is an existing register.
