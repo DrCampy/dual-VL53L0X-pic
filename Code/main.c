@@ -280,12 +280,27 @@ int16_t main(void)
             
         case RUN:
             I2CSlaveInit(slaveI2CAddress);
-            
+            bool isRightRunning = 0;
+            bool isLeftRunning = 0;
             //Enable interrupts for slave I2C and both sensors
             IEC3bits.SI2C2IE = 1;
+            IEC1bits.INT2IE = 1;
             IEC3bits.INT3IE = 1;
             /*Main loop*/
             while(1){
+                if(CONVflag){
+                    /* Start a measurement */
+                }
+                
+                if(isLeftReady){
+                    
+                }
+                
+                if(isRightReady){
+                    
+                }
+                
+                
                 if(i2c_slave_ready == true){
                     /*Manage slave I2C*/    
                     I2CSlaveExec();
