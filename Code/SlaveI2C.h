@@ -17,17 +17,19 @@
  */
 
 //I2C registers
+//Config 
+//RW registers
 #define     I2C_CONFIG_L            0x00
 #define     I2C_CONFIG_H            0x01
-#define     I2C_ADDRESS             0x02 //Last writable register
-#define     I2C_RIGHT               0x03
-#define     I2C_LEFT                0x04
-#define     I2C_MIN                 0x05
-#define     I2C_MAX                 0x06
-#define     I2C_AVG                 0x07
+#define     I2C_ADDRESS             0x02
 
-#define     I2C_LAST_ADD            I2C_AVG
-#define     I2C_NB_REGISTERS        I2C_LAST_ADD+1
+//Distances
+//RO registers
+#define     I2C_RIGHT               0x10
+#define     I2C_LEFT                0x11
+#define     I2C_MIN                 0x12
+#define     I2C_MAX                 0x13
+#define     I2C_AVG                 0x14
 
 void I2CSlaveInit(uint8_t address);
 void I2CSlaveExec();

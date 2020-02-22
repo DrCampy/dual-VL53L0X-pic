@@ -13,7 +13,6 @@
 
 void    I2CSlaveSetAddress          (uint8_t address);
 bool    I2CSlaveIsConfigRegister    (uint8_t reg);
-bool    I2CSlaveIsRegisterWritable  (uint8_t reg);
 uint8_t I2CSlaveGetByte             ();
 void    I2CSlaveSendByte            (uint8_t data);
 void    I2CSlaveAck                 ();
@@ -23,6 +22,8 @@ uint8_t I2CSlaveNextRegister        (bool reg);
 bool    I2CSlaveIsRegisterValid     (uint8_t reg);
 uint8_t I2CSlaveGetRegister         (uint8_t address);
 void    I2CSlaveSetRegister         (uint8_t address, uint8_t data);
+void    I2CSlaveDistReadTrigger     ();
+
 
 extern bool i2cSecondaryAddress;
 //extern bool L_ENflag, R_ENflag, XTALKflag, AUTO_INCflag, CONT_MODEflag, 
@@ -144,12 +145,16 @@ void I2CSlaveSetAddress(uint8_t address){
  * and is read-only.
  */
 bool I2CSlaveIsConfigRegister(uint8_t reg){
-    if(reg >= I2C_CONFIG_L && reg <= I2C_ADDRESS){
-        return true;
-    }else{
-        return false;
-    }
-    
+    switch(reg){
+        case I2C_CONFIG_L:
+        case I2C_CONFIG_H:
+        case I2C_ADDRESS:
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }  
 }
 
 bool I2CSlaveIsRegisterWritable(uint8_t reg){
@@ -223,10 +228,21 @@ uint8_t I2CSlaveNextRegister(bool reg){
  * Returns false otherwise.
  */
 bool I2CSlaveIsRegisterValid(uint8_t reg){
-    if(reg <= I2C_LAST_ADD){
-        return true;
+    switch(reg){
+        case I2C_CONFIG_L:
+        case I2C_CONFIG_H:
+        case I2C_ADDRESS:
+        case I2C_RIGHT:
+        case I2C_LEFT:
+        case I2C_MIN:
+        case I2C_MAX:
+        case I2C_AVG:
+            return true;
+            break;
+        default:
+            return false;
+            break;
     }
-    return false;
 }
 
 void I2CSlaveSetRegister(uint8_t address, uint8_t data){
@@ -243,8 +259,7 @@ void I2CSlaveSetRegister(uint8_t address, uint8_t data){
         default:
             /*Non-writable register*/
             break;
-    }
-    
+    }  
 }
 
 uint8_t I2CSlaveGetRegister(uint8_t address){
