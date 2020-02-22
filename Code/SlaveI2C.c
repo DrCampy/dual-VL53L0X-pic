@@ -268,18 +268,23 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
             return I2C_ADDRESSvalue;
             break;
         case I2C_RIGHT:
+            I2CSlaveDistReadTrigger();
             return rightDist;
             break;
         case I2C_LEFT:
+            I2CSlaveDistReadTrigger();
             return leftDist;
             break;
         case I2C_MIN:
+            I2CSlaveDistReadTrigger();
             return *minDist;
             break;
         case I2C_MAX:
+            I2CSlaveDistReadTrigger();
             return *maxDist;
             break;
         case I2C_AVG:
+            I2CSlaveDistReadTrigger();
             return avgDist;
             break;
         default:
@@ -288,4 +293,13 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
     }
     
     return 0;
+}
+
+/*
+ *This is a trigger that gets executed whenever a distance register is
+ * read by I2C.
+ */
+void I2CSlaveDistReadTrigger(){
+    //Resets the interrupt signal in case it was raised.
+    resetInt();
 }
