@@ -286,6 +286,11 @@ int16_t main(void)
             IEC3bits.SI2C2IE = 1;
             IEC1bits.INT2IE = 1;
             IEC3bits.INT3IE = 1;
+            
+            //Configure interrupt pin
+            TRISBbits.TRISB11 = 0; //Configures as output
+            resetInt(); //Reset int before main code execution
+            
             /*Main loop*/
             while(1){
                 if(CONVflag){

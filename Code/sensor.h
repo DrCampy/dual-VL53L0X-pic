@@ -19,6 +19,10 @@ extern "C" {
 #define CONT_MODE       0b00001000
 #define CONV            0b00000100
 #define CONV_FINISHED   0b00000010
+
+#define INT_OFF         ((uint8_t)0)
+#define INT_L_AND_R     ((uint8_t)1)
+#define INT_L_OR_R      ((uint8_t)2)
     
 #include "Api/inc/core/vl53l0x_api.h"
     
@@ -64,6 +68,9 @@ extern "C" {
     uint8_t getConfigH();
 
     void updateConfig();
+    
+    void raiseInt();
+    void resetInt();
 #ifdef	__cplusplus
 }
 #endif

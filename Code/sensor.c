@@ -207,3 +207,18 @@ void updateConfig(){
     VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
     VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
 }
+
+/*
+ * Raises the interrupt signal
+ */
+void raiseInt(){
+    //RB11
+    LATBbits.LATB11 = 1;
+}
+
+/*
+ * Reset the interrupt signal
+ */
+void resetInt(){
+    LATBbits.LATB11 = 0;
+}
