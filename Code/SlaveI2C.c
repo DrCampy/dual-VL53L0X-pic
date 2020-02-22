@@ -36,8 +36,6 @@ typedef enum{
     RECEIVING_DATA
 } State;
 
-//int     i2cRegisters[I2C_NB_REGISTERS];
-bool    autoIncrement;
 State   state = IDLE;
 
 void I2CSlaveInit(uint8_t address){
@@ -157,10 +155,6 @@ bool I2CSlaveIsConfigRegister(uint8_t reg){
     }  
 }
 
-bool I2CSlaveIsRegisterWritable(uint8_t reg){
-    return I2CSlaveIsConfigRegister(reg);
-}
-
 /*
  * Reads a byte from the I2C bus.
  */
@@ -199,7 +193,7 @@ uint8_t I2CSlaveNextRegister(bool reg){
     
     // If the register is a config register we loop accross them
     if(I2CSlaveIsConfigRegister(reg)){
-        if(autoIncrement == false){
+        if(AUTO_INCflag == false){
             return reg;
         }else{
             reg++;
@@ -210,7 +204,7 @@ uint8_t I2CSlaveNextRegister(bool reg){
     }
     //If the register is a distance register we loop accross them
     else{
-        if(autoIncrement == false){
+        if(AUTO_INCflag == false){
             return reg;
         }else{
             reg++;
