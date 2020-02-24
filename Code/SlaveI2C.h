@@ -10,10 +10,11 @@
 
 /*
  * To add a new register :
- * - Add it here with it's define for the address 
- *   (update I2C_LAST_ADD and I2C_NB_REGISTERS)
- * - Update I2CSlaveIsLowRegister function
- * - Update I2CSlaveNextRegister function
+ * - Update I2CSlaveIsConfigRegister
+ * - Update I2CSlaveIsRegisterValid
+ * - Update I2CSlaveNextRegister
+ * - Update I2CSlaveGetRegister
+ * - Update I2CSlaveSetRegister (if writable register)
  */
 
 //I2C registers

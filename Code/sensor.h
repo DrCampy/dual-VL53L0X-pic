@@ -26,12 +26,13 @@ extern "C" {
     
 #include "Api/inc/core/vl53l0x_api.h"
     
-    extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
+    /*Sensors handles*/
+    extern VL53L0X_DEV RightSensor, LeftSensor; 
 
     /* Config Updated flag */
     extern bool CONFIG_UPDATEDflag;
     
-    /*Config low register*/
+    /* Config low register */
     extern bool L_ENflag;
     extern bool R_ENflag;
     extern bool XTALKflag;
@@ -40,10 +41,11 @@ extern "C" {
     extern bool CONVflag;
     extern bool CONV_FINISHEDflag;
 
-    /*Config high register*/
+    /* Config high register */
     extern uint8_t INT_MODEflags; /* 2 bits */
     extern uint8_t DURATIONval; /* 6 bits */
     
+    /* Address register */
     extern uint8_t I2C_ADDRESSvalue;
     
     /* Distances */

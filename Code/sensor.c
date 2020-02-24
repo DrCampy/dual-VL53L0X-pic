@@ -67,7 +67,7 @@ void powerOnLeftSensor(){
  * CONV: Start conversion. In case CONT_MODE = 1, starts measurements until
  *        CONV is set back to 0 again.
  * 
- * CONV_FINISHED: Set to 1 once mea
+ * CONV_FINISHED: Set to 1 once measurement over
  * 
  * Structure of config_h:
  * INT_MODE    DURATION<0:5>
