@@ -302,4 +302,5 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
 void I2CSlaveDistReadTrigger(){
     //Resets the interrupt signal in case it was raised.
     resetInt();
+    CONV_FINISHEDflag = false;
 }
