@@ -155,13 +155,10 @@
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-/* TODO Add interrupt routine code here. */
 extern volatile bool i2c_slave_ready;
 extern volatile bool isLeftReady, isRightReady;
 
-
-//IFS3[1] = flag bit
-//IEC3[1] = enabled
+/* Interrupt for I2C2 (slave)*/
 void __attribute__((interrupt,auto_psv)) _SI2C2Interrupt(void){
     i2c_slave_ready = true;
     IFS3bits.SI2C2IF = 0; //lower interrupt flag
