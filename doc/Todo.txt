@@ -5,3 +5,4 @@ power
 I2C
 Registers
 PCB with annotations
+DIP Switch
