@@ -123,18 +123,26 @@ void I2CSlaveExec(){
     }    
 }
 
+/*
+ * Updates the I2C address of the sensor. 
+ * If the sensor is in secondary address mode the address used will not be used.
+ * Only the address of the normal address mode can be changed.
+ */
 void I2CSlaveSetAddress(uint8_t address){
-    //Write address to I2C module
-    I2C2ADD = address;
-    
-    //If we use the secondary i2c address mode we should not save it to
-    // flash memory
+
+    /*
+     * If we use the secondary i2c address mode we should not update the
+     * current address, only update the address in memory
+     */
     if(i2cSecondaryAddress == false){
-        //Write address to flash memory
-        writeI2CSlaveAddress(&address);
+        //Write address to I2C module
+        I2C2ADD = address;
+        //Update the internal value of the address.
+        I2C_ADDRESSvalue = address;
     }
-    
-    I2C_ADDRESSvalue = address;
+
+    //Write address to flash memory
+    writeI2CSlaveAddress(&address);
 }
 
 /*
