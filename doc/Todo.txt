@@ -1,0 +1,7 @@
+Block diagram
+bom
+pinout
+power
+I2C
+Registers
+PCB with annotations
