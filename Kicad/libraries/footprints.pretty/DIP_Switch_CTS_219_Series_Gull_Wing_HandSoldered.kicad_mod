@@ -1,4 +1,4 @@
-(module DIP_Switch_CTS_219_Series_Gull_Wing_HandSoldered (layer F.Cu) (tedit 5E499FE8)
+(module DIP_Switch_CTS_219_Series_Gull_Wing_HandSoldered (layer F.Cu) (tedit 5E5A84A6)
   (fp_text reference REF** (at 0 13.97) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
@@ -14,6 +14,6 @@
   (model ${KIPRJMOD}/libraries/footprints.pretty/DIP_Switch_CTS_219_Series_Gull_Wing_HandSoldered.STEP
     (offset (xyz 4.25 -2.5 0))
     (scale (xyz 1 1 1))
-    (rotate (xyz -90 0 -90))
+    (rotate (xyz -90 0 90))
   )
 )
