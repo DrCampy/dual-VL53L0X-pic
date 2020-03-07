@@ -48,6 +48,7 @@
 /*char  debug_string[VL53L0X_MAX_STRING_LENGTH_PLT];*/
 
 uint8_t cached_page = 0;
+bool isCommInit = false;
 
 #define MIN_COMMS_VERSION_MAJOR     1
 #define MIN_COMMS_VERSION_MINOR     8
@@ -73,24 +74,65 @@ int VL53L0X_i2c_init(void)
 #else
 #error I2C not setup for selected FCY frequency.
 #endif
+    I2C1CONHbits.PCIE = 1;
+    I2C1CONHbits.SCIE = 1;
+    
     I2C1CONLbits.I2CEN = 1; /*enables module*/
+
+    /* Workarround for I2C Sillicon bug.
+     * After a reset of the device, if a start condition is placed on the bus,
+     * a bus write collision may occur instead of a start condition. (I2C1 only)
+     * Workarround : 
+     * Drive SCL1 low
+     * Set SDA1 as output
+     * Drive SDA1 low
+     * Drive SDA1 high
+     */
+    TRISBbits.TRISB8 = 0; //SCL1 output
+    TRISBbits.TRISB9 = 0; //SDA1 output
+    LATBbits.LATB8 = 0; //SCL low
+    LATBbits.LATB9 = 0; //SDA low
+    LATBbits.LATB8 = 1; //SDA high
+    LATBbits.LATB9 = 1; //SCL high
+    TRISBbits.TRISB8 = 1; //SCL1 input
+    TRISBbits.TRISB9 = 1; //SDA1 input
+            
+    /* Enables interrupts for I2C1 */
+    IEC1bits.MI2C1IE = 1;
+    
+    isCommInit = true;
+    
     return STATUS_OK;
 }
 int32_t VL53L0X_comms_close(void)
 {
     I2C1CONLbits.I2CEN = 0;
-
+    isCommInit = false;
     return STATUS_OK;
 }
 
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {
+    /* Ensures comm port have been initialized before proceeding */
+    if(!isCommInit){
+        VL53L0X_i2c_init();
+    }
+    
+    //Check I2C1STATbits.P
+    //I2C1STATbits.P == 0
     /*1. Start*/
     I2C1CONLbits.SEN = 1;
 
+    /*while(IFS1bits.MI2C1IF == false){
+        Idle();
+    }*/
+    while(I2C1STATbits.TRSTAT == 1);
+    
     /*2. Send address*/
     I2C1TRN = address;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    while(I2C1STATbits.TRSTAT == 1);
+
+    //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*3. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -100,7 +142,9 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
     }
     /*4. Send Index*/
     I2C1TRN = reg;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    while(I2C1STATbits.TRSTAT == 1);
+
+    //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -113,7 +157,9 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
     for(; i < count; i++){
         /*6. send data*/
         I2C1TRN = pdata[i];
-        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+        while(I2C1STATbits.TRSTAT == 1);
+
+        //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
 
         /*Check for ack*/
         if(I2C1STATbits.ACKSTAT != 0){
