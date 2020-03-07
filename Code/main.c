@@ -73,6 +73,10 @@ int16_t main(void)
      * RB14 = INT_L = RP14 = INT3
      */
     RPINR1 = 0xDE;
+    //Configure shutdown pins as open-drain
+    ODCBbits.ODCB15 = 1; //12
+    ODCBbits.ODCB12 = 1;
+                //15
 
     /* 
      * Uses General call address so devices are always reconfigured
@@ -105,7 +109,7 @@ int16_t main(void)
         }else{
             currentMode = OFFSET_CAL;
         }
-    }else{
+    }else{ /* DIPS[1] == true*/
         if(DIPS[2] == false){
             currentMode = XTALK_CAL;
         }else{

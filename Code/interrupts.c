@@ -177,3 +177,7 @@ void __attribute__((interrupt,auto_psv)) _INT3Interrupt(void){
     IFS3bits.INT3IF = 0; //lower interrupt flag
 }
 
+
+void __attribute__((interrupt,auto_psv)) _MI2C1Interrupt(void){
+    
+}
