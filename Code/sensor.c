@@ -32,19 +32,19 @@ uint8_t *minDist;
 uint8_t *maxDist;
 
 void powerOffRightSensor(){
-    LATB &= !(1 << XSHUT_R);
+    LATBbits.LATB12 = 0;
 }
 
 void powerOnRightSensor(){
-    LATB |= 1 << XSHUT_R;
+    LATBbits.LATB12 = 1;
 }
 
 void powerOffLeftSensor(){
-    LATB &= !(1 << XSHUT_L);
+    LATBbits.LATB15 = 0;
 }
 
 void powerOnLeftSensor(){
-    LATB |= 1 << XSHUT_L;
+    LATBbits.LATB15 = 1;
 }
 
 /*
