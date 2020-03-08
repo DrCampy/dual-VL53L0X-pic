@@ -8,6 +8,7 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "config.h"        /* Configuration definitions                       */
 #include <libpic30.h>
+#include <p24FJ256GA702.h>
 #include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
 #include "data_storage.h"
 #include "DEEE/Include/DEE Emulation 16-bit/DEE Emulation 16-bit.h"
@@ -74,9 +75,15 @@ int16_t main(void)
      */
     RPINR1 = 0xDE;
     //Configure shutdown pins as open-drain
-    ODCBbits.ODCB15 = 1; //12
-    ODCBbits.ODCB12 = 1;
-                //15
+    ANSBbits.ANSB15 = 0;
+    //ODCBbits.ODCB15 = 1;
+    TRISBbits.TRISB15 = 0;
+    LATBbits.LATB15 = 0;
+        
+    ANSBbits.ANSB12 = 0;
+    //ODCBbits.ODCB12 = 1;
+    TRISBbits.TRISB12 = 0;
+    LATBbits.LATB12 = 0;
 
     /* 
      * Uses General call address so devices are always reconfigured
@@ -123,6 +130,7 @@ int16_t main(void)
     /* Configure shutdown pins as outputs */
     TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
     
+    ledOn();
     /* Configure right sensor address */
     powerOnRightSensor(); /* Wake up right sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
