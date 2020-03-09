@@ -232,5 +232,5 @@ void initVL53L0X(){
     RightSensor = &__RightSensor_;
     LeftSensor = &__LeftSensor_;
     RightSensor->I2cDevAddr = 0x52;
-    LeftSensor->I2cDevAddr = 0x00;
+    LeftSensor->I2cDevAddr = 0x52;
 }

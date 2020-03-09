@@ -29,6 +29,7 @@ void __attribute__((interrupt,no_auto_psv)) _OscillatorFail(void);
 void __attribute__((interrupt,no_auto_psv)) _AddressError(void);
 void __attribute__((interrupt,no_auto_psv)) _StackError(void);
 void __attribute__((interrupt,no_auto_psv)) _MathError(void);
+void __attribute__((interrupt,no_auto_psv)) _NVMError(void);
 
 #if defined(__PIC24F__)||defined(__PIC24H__)
 
@@ -66,25 +67,36 @@ void __attribute__((interrupt,no_auto_psv)) _SoftTrapError(void);
 /* Primary (non-alternate) address error trap function declarations */
 void __attribute__((interrupt,no_auto_psv)) _OscillatorFail(void)
 {
+    __builtin_software_breakpoint();
         INTCON1bits.OSCFAIL = 0;        /* Clear the trap flag */
         while(1);
 }
 
 void __attribute__((interrupt,no_auto_psv)) _AddressError(void)
 {
+    __builtin_software_breakpoint();
         INTCON1bits.ADDRERR = 0;        /* Clear the trap flag */
         while (1);
 }
 void __attribute__((interrupt,no_auto_psv)) _StackError(void)
 {
+    __builtin_software_breakpoint();
         INTCON1bits.STKERR = 0;         /* Clear the trap flag */
         while (1);
 }
 
 void __attribute__((interrupt,no_auto_psv)) _MathError(void)
 {
+    __builtin_software_breakpoint();
         INTCON1bits.MATHERR = 0;        /* Clear the trap flag */
         while (1);
+}
+
+void __attribute__((interrupt,no_auto_psv)) _NVMError(void) {
+    __builtin_software_breakpoint();
+    while(true){
+        Nop();
+    } 
 }
 
 #if defined(__PIC24F__)||defined(__PIC24H__)
@@ -124,6 +136,7 @@ void __attribute__((interrupt,no_auto_psv)) _AltMathError(void)
 /******************************************************************************/
 void __attribute__((interrupt,no_auto_psv)) _DefaultInterrupt(void)
 {
+    __builtin_software_breakpoint();
         while(1);
 }
 
