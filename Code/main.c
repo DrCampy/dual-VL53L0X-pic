@@ -23,6 +23,12 @@
  */
 #define DEBUG
 
+//#define USE_I2C_1V8
+#ifndef USE_I2C_2V8 //Must be defined at compilation level.
+#ifndef USE_I2C_1V8
+#error "Voltage not defined !"
+#endif
+#endif
 /******************************************************************************/
 /* Custom Functions, enums,...                                                */
 /******************************************************************************/
