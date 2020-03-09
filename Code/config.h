@@ -2,7 +2,7 @@
  * File:   config.h
  * Author: Morgan Diepart
  *
- * Created on 27 décembre 2019, 01:34
+ * Created on 27 dï¿½cembre 2019, 01:34
  */
 
 #ifndef CONFIG_H
@@ -23,9 +23,7 @@ extern "C" {
     
 /*XTalk calibration distance in mm*/
 #define XTALK_CAL_DISTANCE 500
-    
-/*Define needed for the API to use I2C in 2.8V*/
-#define USE_I2C_2V8
+
     
 /* Defines bit position for used pins */
 #define XSHUT_L 15
