@@ -67,6 +67,7 @@ int16_t main(void)
     /* Initialize EEprom Emulator */
     DataEEInit();
     
+    initVL53L0X();
     bool DIPS[3];
     DIPS[0] = PORTBbits.DIP1pin; /* Calibration Mode */
     DIPS[1] = PORTBbits.DIP2pin; /* LED Mode or Calibration Data Management */
@@ -97,8 +98,8 @@ int16_t main(void)
      * If their address was changed by a previous config it may
      * otherwise cause problems.
      */
-    LeftSensor->I2cDevAddr = 0x00; 
-    RightSensor->I2cDevAddr = 0x00;
+    //LeftSensor->I2cDevAddr = 0; 
+    //RightSensor->I2cDevAddr = 0;
     
     bool ledMode;
 
@@ -134,7 +135,7 @@ int16_t main(void)
     TRISBbits.TRISB4 = 0;
     
     /* Configure shutdown pins as outputs */
-    TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
+    //TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
     
     ledOn();
     /* Configure right sensor address */

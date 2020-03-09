@@ -73,6 +73,8 @@ extern "C" {
     
     void raiseInt();
     void resetInt();
+    
+    void initVL53L0X();
 #ifdef	__cplusplus
 }
 #endif
