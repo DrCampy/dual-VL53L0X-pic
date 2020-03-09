@@ -60,49 +60,31 @@ VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,
 
 int16_t main(void)
 {
-    
-    /* Configure the oscillator for the device */
-    ConfigureOscillator();
-    
-    /* Initialize EEprom Emulator */
-    DataEEInit();
-    
-    initVL53L0X();
-    bool DIPS[3];
-    DIPS[0] = PORTBbits.DIP1pin; /* Calibration Mode */
-    DIPS[1] = PORTBbits.DIP2pin; /* LED Mode or Calibration Data Management */
-    DIPS[2] = PORTBbits.DIP3pin; /* Slave I2C address */
+    ConfigureOscillator();          /* Configure the oscillator */
 
+    /* Declarations */
+    bool DIPS[3];
+    bool ledMode;
     uint8_t slaveI2CAddress;
     Mode currentMode = RUN;
     
-    /* Sensors Interrupts config register
-     * RB13 = INT_R = RP13 = INT2
-     * RB14 = INT_L = RP14 = INT3
-     */
-    RPINR1 = 0xDE;
-    //Configure shutdown pins as open-drain
-    ANSBbits.ANSB15 = 0;
-    //ODCBbits.ODCB15 = 1;
-    TRISBbits.TRISB15 = 0;
-    LATBbits.LATB15 = 0;
-        
-    ANSBbits.ANSB12 = 0;
-    //ODCBbits.ODCB12 = 1;
-    TRISBbits.TRISB12 = 0;
-    LATBbits.LATB12 = 0;
-
-    /* 
-     * Uses General call address so devices are always reconfigured
-     * independently of their previous configuration
-     * If their address was changed by a previous config it may
-     * otherwise cause problems.
-     */
-    //LeftSensor->I2cDevAddr = 0; 
-    //RightSensor->I2cDevAddr = 0;
-    
-    bool ledMode;
-
+    /* Initializations */
+    RCON = 0x2000;
+    DataEEInit();                   /* Initialize EEprom Emulator */
+    initVL53L0X();                  /* Initialize sensors sructures */
+    DIPS[0] = PORTBbits.DIP1pin;    /* Calibration Mode */
+    DIPS[1] = PORTBbits.DIP2pin;    /* LED Mode or Cal Data Management */
+    DIPS[2] = PORTBbits.DIP3pin;    /* Slave I2C address */  
+    RPINR1 = 0xDE;                  /* Sensors Interrupts config register */
+                                    /* RB13 = INT_R = RP13 = INT2
+                                     * RB14 = INT_L = RP14 = INT3*/
+    ANSBbits.ANSB15 = 0;            /* Configure XSHUT_L as digital */
+    ODCBbits.ODCB15 = 1;            /* Configure XSHUT_L as open-drain */
+    TRISBbits.TRISB15 = 0;          /* Configure XSHUT_L as output */
+    ANSBbits.ANSB12 = 0;            /* Configure XSHUT_R as digital */
+    ODCBbits.ODCB12 = 1;            /* Configure XSHUT_R as open-drain */
+    TRISBbits.TRISB12 = 0;          /* Configure XSHUT_R as output */
+    TRISBbits.TRISB4 = 0;           /* Configures LED pin as output */
     
     if(DIPS[0] == false){ /*We are in run mode*/
         currentMode = RUN;
@@ -130,15 +112,9 @@ int16_t main(void)
             currentMode = RST;
         }
     }
-
-    /* Configures LED pin. Led pin is RB4 */
-    TRISBbits.TRISB4 = 0;
     
-    /* Configure shutdown pins as outputs */
-    //TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
-    
-    ledOn();
     /* Configure right sensor address */
+    powerOffLeftSensor(); /* Put left sensor to sleep */
     powerOnRightSensor(); /* Wake up right sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(RightSensor, 0x54);
@@ -147,8 +123,7 @@ int16_t main(void)
     /* Configure left sensor address */
     powerOnLeftSensor(); /* Wake up left sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
-    VL53L0X_SetDeviceAddress(LeftSensor, 0x52);
-    
+    VL53L0X_SetDeviceAddress(LeftSensor, 0x52);    
     powerOnRightSensor();
     
     StatusR = VL53L0X_DataInit(RightSensor);

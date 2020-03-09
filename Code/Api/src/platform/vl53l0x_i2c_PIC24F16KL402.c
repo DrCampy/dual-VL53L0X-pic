@@ -172,6 +172,8 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
 
     /*8. Send stop*/
     I2C1CONLbits.PEN = 1;
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
 
     return STATUS_OK;
 }
@@ -184,7 +186,8 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     /*2. Send address */
     I2C1TRN = address;
     while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-
+    IFS1bits.MI2C1IF = 0;
+    
     /*3. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
@@ -194,6 +197,7 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     /*4. Send Index*/
     I2C1TRN = index;
     while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
 
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -207,12 +211,14 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
 
     /*7. Send repeated start*/
     I2C1CONLbits.RSEN = 1;
-
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
+    
     /*8. Send address + 1 for reading*/
     I2C1CONL = address+1;
-
     while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-
+    IFS1bits.MI2C1IF = 0;
+    
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
@@ -224,8 +230,10 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     uint8_t i = 0;
     for(; i < count; i++){
         /*9. gets data*/
-        //while(IFS1bits.SSP1IF == 0){} /*Wait for interrupt*/
+        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+        IFS1bits.MI2C1IF = 0;
         pdata[i] = I2C1RCV;
+        
         /*Sends ack*/
         I2C1CONLbits.ACKEN = 1;
     }
@@ -233,7 +241,9 @@ int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32
     /*8. Send stop*/
     I2C1CONLbits.PEN = 1;
     I2C1CONLbits.RCEN = 0; /*leaves receive mode*/
-
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
+    
     return STATUS_OK;
 }
 
