@@ -66,7 +66,7 @@ bool _check_min_version(void)
 /*Uses MSSP1 in I2C mode. Speed is 100 kbit*/
 int VL53L0X_i2c_init(void)
 {
-    
+    // Baud rate generator for 100kHz I2C
 #if(FCY == F16MHZ)
     I2C1BRG = 0x4E; /* If Fosc = 32MHz*/
 #elif(FCY == F8MHZ)
@@ -74,20 +74,20 @@ int VL53L0X_i2c_init(void)
 #else
 #error I2C not setup for selected FCY frequency.
 #endif
-    I2C1CONHbits.PCIE = 1;
-    I2C1CONHbits.SCIE = 1;
-    
-    I2C1CONLbits.I2CEN = 1; /*enables module*/
 
+    I2C1CONL = 0x8000; /*enables module*/
+    I2C1STAT = 0x00;
     /* Workarround for I2C Sillicon bug.
      * After a reset of the device, if a start condition is placed on the bus,
      * a bus write collision may occur instead of a start condition. (I2C1 only)
-     * Workarround : 
+     * Workarround :
      * Drive SCL1 low
      * Set SDA1 as output
      * Drive SDA1 low
      * Drive SDA1 high
      */
+
+    ANSBbits.ANSB9 = 0;
     TRISBbits.TRISB8 = 0; //SCL1 output
     TRISBbits.TRISB9 = 0; //SDA1 output
     LATBbits.LATB8 = 0; //SCL low
