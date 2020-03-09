@@ -96,12 +96,14 @@ int VL53L0X_i2c_init(void)
     LATBbits.LATB9 = 1; //SCL high
     TRISBbits.TRISB8 = 1; //SCL1 input
     TRISBbits.TRISB9 = 1; //SDA1 input
-            
+
+    /* Clears interrupt flag */
+    IFS1bits.MI2C1IF = 0;
     /* Enables interrupts for I2C1 */
     IEC1bits.MI2C1IE = 1;
-    
+
     isCommInit = true;
-    
+
     return STATUS_OK;
 }
 int32_t VL53L0X_comms_close(void)
@@ -113,26 +115,25 @@ int32_t VL53L0X_comms_close(void)
 
 int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {
+    //Do more checks of BCL and so on
+
     /* Ensures comm port have been initialized before proceeding */
     if(!isCommInit){
         VL53L0X_i2c_init();
     }
-    
-    //Check I2C1STATbits.P
-    //I2C1STATbits.P == 0
+
+    I2C1STAT = 0x00;
+
     /*1. Start*/
     I2C1CONLbits.SEN = 1;
 
-    /*while(IFS1bits.MI2C1IF == false){
-        Idle();
-    }*/
-    while(I2C1STATbits.TRSTAT == 1);
-    
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
+
     /*2. Send address*/
     I2C1TRN = address;
-    while(I2C1STATbits.TRSTAT == 1);
-
-    //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
 
     /*3. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -142,9 +143,8 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
     }
     /*4. Send Index*/
     I2C1TRN = reg;
-    while(I2C1STATbits.TRSTAT == 1);
-
-    //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+    IFS1bits.MI2C1IF = 0;
 
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -157,9 +157,10 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
     for(; i < count; i++){
         /*6. send data*/
         I2C1TRN = pdata[i];
-        while(I2C1STATbits.TRSTAT == 1);
+        //while(I2C1STATbits.TRSTAT == 1);
 
-        //while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
+        IFS1bits.MI2C1IF = 0;
 
         /*Check for ack*/
         if(I2C1STATbits.ACKSTAT != 0){
@@ -353,9 +354,9 @@ int32_t VL53L0X_write_byte16(uint8_t address, uint16_t index, uint8_t data)
 {
     int32_t status = STATUS_OK;
     const int32_t cbyte_count = 1;
-    
+
     status = VL53L0X_write_multi16(address, index, &data, cbyte_count);
-    
+
     return status;
 }
 */
