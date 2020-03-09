@@ -4,6 +4,7 @@
 #include "config.h"
 #include "sensor.h"
 
+VL53L0X_Dev_t __RightSensor_, __LeftSensor_;
 VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
 /* Config Updated flag */
@@ -221,4 +222,15 @@ void raiseInt(){
  */
 void resetInt(){
     LATBbits.LATB11 = 0;
+}
+
+/*
+ * Initializes the sensor's structure with default data, including default I2C
+ * address as 0x00 (general call)
+ */
+void initVL53L0X(){
+    RightSensor = &__RightSensor_;
+    LeftSensor = &__LeftSensor_;
+    RightSensor->I2cDevAddr = 0x52;
+    LeftSensor->I2cDevAddr = 0x00;
 }
