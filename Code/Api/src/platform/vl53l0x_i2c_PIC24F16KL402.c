@@ -64,7 +64,7 @@ bool _check_min_version(void)
 }
 
 /*Uses MSSP1 in I2C mode. Speed is 100 kbit*/
-int VL53L0X_i2c_init(void)
+int8_t VL53L0X_i2c_init(void)
 {
     // Baud rate generator for 100kHz I2C
 #if(FCY == F16MHZ)
@@ -106,14 +106,14 @@ int VL53L0X_i2c_init(void)
 
     return STATUS_OK;
 }
-int32_t VL53L0X_comms_close(void)
+int8_t VL53L0X_comms_close(void)
 {
     I2C1CONLbits.I2CEN = 0;
     isCommInit = false;
     return STATUS_OK;
 }
 
-int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
+int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t count)
 {
     //Do more checks of BCL and so on
 
@@ -178,7 +178,7 @@ int32_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_
     return STATUS_OK;
 }
 
-int32_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
+int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_t count)
 {
     /*1. Start*/
     I2C1CONLbits.SEN = 1;
@@ -259,10 +259,9 @@ int32_t VL53L0X_write_byte(uint8_t address, uint8_t index, uint8_t data)
 
 }
 
-
-int32_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
+int8_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
 
     uint8_t  buffer[BYTES_PER_WORD];
 
@@ -286,9 +285,9 @@ int32_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
 }
 
 
-int32_t VL53L0X_write_dword(uint8_t address, uint8_t index, uint32_t data)
+int8_t VL53L0X_write_dword(uint8_t address, uint8_t index, uint32_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     uint8_t  buffer[BYTES_PER_DWORD];
 
     /* Split 32-bit word into MS ... LS bytes*/
@@ -304,9 +303,9 @@ int32_t VL53L0X_write_dword(uint8_t address, uint8_t index, uint32_t data)
 }
 
 
-int32_t VL53L0X_read_byte(uint8_t address, uint8_t index, uint8_t *pdata)
+int8_t VL53L0X_read_byte(uint8_t address, uint8_t index, uint8_t *pdata)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     int32_t cbyte_count = 1;
 
     status = VL53L0X_read_multi(address, index, pdata, cbyte_count);
@@ -315,7 +314,7 @@ int32_t VL53L0X_read_byte(uint8_t address, uint8_t index, uint8_t *pdata)
 }
 
 
-int32_t VL53L0X_read_word(uint8_t address, uint8_t index, uint16_t *pdata)
+int8_t VL53L0X_read_word(uint8_t address, uint8_t index, uint16_t *pdata)
 {
     int32_t  status = STATUS_OK;
 	uint8_t  buffer[BYTES_PER_WORD];
@@ -327,9 +326,9 @@ int32_t VL53L0X_read_word(uint8_t address, uint8_t index, uint16_t *pdata)
 
 }
 
-int32_t VL53L0X_read_dword(uint8_t address, uint8_t index, uint32_t *pdata)
+int8_t VL53L0X_read_dword(uint8_t address, uint8_t index, uint32_t *pdata)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
 	uint8_t  buffer[BYTES_PER_DWORD];
 
     status = VL53L0X_read_multi(address, index, buffer, BYTES_PER_DWORD);
@@ -346,14 +345,14 @@ int32_t VL53L0X_read_dword(uint8_t address, uint8_t index, uint32_t *pdata)
 /*
 int32_t VL53L0X_write_multi16(uint8_t address, uint16_t index, uint8_t *pdata, int32_t count)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
 
     return status;
 }
 
 int32_t VL53L0X_read_multi16(uint8_t address, uint16_t index, uint8_t *pdata, int32_t count)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
 
     return status;
 }
@@ -362,7 +361,7 @@ int32_t VL53L0X_read_multi16(uint8_t address, uint16_t index, uint8_t *pdata, in
 
 int32_t VL53L0X_write_byte16(uint8_t address, uint16_t index, uint8_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     const int32_t cbyte_count = 1;
 
     status = VL53L0X_write_multi16(address, index, &data, cbyte_count);
@@ -373,7 +372,7 @@ int32_t VL53L0X_write_byte16(uint8_t address, uint16_t index, uint8_t data)
 
 /*int32_t VL53L0X_write_word16(uint8_t address, uint16_t index, uint16_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
 
     uint8_t  buffer[BYTES_PER_WORD];
 */
@@ -399,7 +398,7 @@ int32_t VL53L0X_write_byte16(uint8_t address, uint16_t index, uint8_t data)
 
 /*int32_t VL53L0X_write_dword16(uint8_t address, uint16_t index, uint32_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     uint8_t  buffer[BYTES_PER_DWORD];
 */
     /* Split 32-bit word into MS ... LS bytes*/
@@ -417,7 +416,7 @@ int32_t VL53L0X_write_byte16(uint8_t address, uint16_t index, uint8_t data)
 
 int32_t VL53L0X_read_byte16(uint8_t address, uint16_t index, uint8_t *pdata)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     int32_t cbyte_count = 1;
 
     status = VL53L0X_read_multi16(address, index, pdata, cbyte_count);
@@ -439,7 +438,7 @@ int32_t VL53L0X_read_word16(uint8_t address, uint16_t index, uint16_t *pdata)
 
 int32_t VL53L0X_read_dword16(uint8_t address, uint16_t index, uint32_t *pdata)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     uint8_t  buffer[BYTES_PER_DWORD];
 
     status = VL53L0X_read_multi16(address, index, buffer, BYTES_PER_DWORD);
@@ -468,7 +467,7 @@ int32_t VL53L0X_wait_ms(int32_t wait_ms)
 */
 
 
-int32_t VL53L0X_set_gpio(uint8_t level)
+int8_t VL53L0X_set_gpio(uint8_t level)
 {
     /*status = VL53L0X_set_gpio_sv(level);*/
 
@@ -477,31 +476,31 @@ int32_t VL53L0X_set_gpio(uint8_t level)
 }
 
 
-int32_t VL53L0X_get_gpio(uint8_t *plevel)
+int8_t VL53L0X_get_gpio(uint8_t *plevel)
 {
     return STATUS_OK;
 }
 
 
-int32_t VL53L0X_release_gpio(void)
+int8_t VL53L0X_release_gpio(void)
 {
     return STATUS_OK;
 
 }
 
-int32_t VL53L0X_cycle_power(void)
+int8_t VL53L0X_cycle_power(void)
 {
     return STATUS_OK;
 }
 
 
-int32_t VL53L0X_get_timer_frequency(int32_t *ptimer_freq_hz){
+int8_t VL53L0X_get_timer_frequency(int32_t *ptimer_freq_hz){
        *ptimer_freq_hz = 0;
        return STATUS_FAIL;
 }
 
 
-int32_t VL53L0X_get_timer_value(int32_t *ptimer_count){
+int8_t VL53L0X_get_timer_value(int32_t *ptimer_count){
        *ptimer_count = 0;
        return STATUS_FAIL;
 }
