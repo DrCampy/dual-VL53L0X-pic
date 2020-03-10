@@ -248,9 +248,10 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
 }
 
 
-int32_t VL53L0X_write_byte(uint8_t address, uint8_t index, uint8_t data)
+/*
+int8_t VL53L0X_write_byte(uint8_t address, uint8_t index, uint8_t data)
 {
-    int32_t status = STATUS_OK;
+    int8_t status = STATUS_OK;
     const int32_t cbyte_count = 1;
 
     status = VL53L0X_write_multi(address, index, &data, cbyte_count);
@@ -258,6 +259,7 @@ int32_t VL53L0X_write_byte(uint8_t address, uint8_t index, uint8_t data)
     return status;
 
 }
+*/
 
 int8_t VL53L0X_write_word(uint8_t address, uint8_t index, uint16_t data)
 {
