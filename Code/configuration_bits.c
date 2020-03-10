@@ -40,7 +40,7 @@
 #pragma config WDTCLK = LPRC    //WDT Clock Source Select bits->WDT uses LPRC
 
 // FPOR
-#pragma config BOREN = ON    //Brown Out Enable bit->Brown Out Enable Bit
+#pragma config BOREN = OFF    //Brown Out Enable bit->Brown Out Enable Bit
 #pragma config LPCFG = OFF    //Low power regulator control->No Retention Sleep
 #pragma config DNVPEN = ENABLE    //Downside Voltage Protection Enable bit->Downside protection enabled using ZPBOR when BOR is inactive
 
