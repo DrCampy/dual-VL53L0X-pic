@@ -16,6 +16,7 @@
 #endif
 
 #include "system.h"          /* variables/params used by system.c */
+#include <stdbool.h>
 
 /******************************************************************************/
 /* System Level Functions                                                     */
