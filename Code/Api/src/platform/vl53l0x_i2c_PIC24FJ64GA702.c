@@ -135,7 +135,7 @@ int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t
     I2C1STAT = 0x00;
 
     LATBbits.LATB4 = 0; //led off
-    __delay_ms(1000);
+
     /*2. Send address*/
     I2C1TRN = address;
     while(I2C1STATbits.TRSTAT == 1){}
@@ -219,7 +219,7 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
     while(I2C1CONLbits.RSEN == 1){} /*Wait for interrupt*/
     
     /*8. Send address + 1 for reading*/
-    I2C1CONL = address+1;
+    I2C1TRN = address+1;
     while(I2C1STATbits.TRSTAT == 1){} /*Wait for interrupt*/
     
     /*5. Check for ack*/
@@ -245,6 +245,7 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
         
         /*Sends ack*/
         I2C1CONLbits.ACKEN = 1;
+        while(I2C1CONLbits.ACKEN == 1){} /* Wait for ack to be sent */
     }
 
     /*8. Send stop*/
