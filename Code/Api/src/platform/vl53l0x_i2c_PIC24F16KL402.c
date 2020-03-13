@@ -35,6 +35,8 @@
 #include "vl53l0x_platform_log.h"
 #include "../../../system.h"
 #include <xc.h>
+#include <libpic30.h>
+#include <p24FJ256GA702.h>
 
 #define F16MHZ 16000000L
 #define F8MHZ 8000000L
@@ -49,6 +51,7 @@
 
 uint8_t cached_page = 0;
 bool isCommInit = false;
+void I2CWaitForInterrupt();
 
 #define MIN_COMMS_VERSION_MAJOR     1
 #define MIN_COMMS_VERSION_MINOR     8
@@ -75,6 +78,9 @@ int8_t VL53L0X_i2c_init(void)
 #error I2C not setup for selected FCY frequency.
 #endif
 
+    
+        ANSBbits.ANSB9 = 0;
+
     I2C1CONL = 0x8000; /*enables module*/
     I2C1STAT = 0x00;
     /* Workarround for I2C Sillicon bug.
@@ -87,7 +93,6 @@ int8_t VL53L0X_i2c_init(void)
      * Drive SDA1 high
      */
 
-    ANSBbits.ANSB9 = 0;
     TRISBbits.TRISB8 = 0; //SCL1 output
     TRISBbits.TRISB9 = 0; //SDA1 output
     LATBbits.LATB8 = 0; //SCL low
@@ -96,13 +101,9 @@ int8_t VL53L0X_i2c_init(void)
     LATBbits.LATB9 = 1; //SCL high
     TRISBbits.TRISB8 = 1; //SCL1 input
     TRISBbits.TRISB9 = 1; //SDA1 input
-
-    /* Clears interrupt flag */
-    IFS1bits.MI2C1IF = 0;
-    /* Enables interrupts for I2C1 */
-    IEC1bits.MI2C1IE = 1;
-
+    
     isCommInit = true;
+    //IPC4bits.MI2C1IP = 1;
 
     return STATUS_OK;
 }
@@ -121,20 +122,26 @@ int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t
     if(!isCommInit){
         VL53L0X_i2c_init();
     }
-
+    
+    /* Enables interrupts for I2C1 */
+    __write_to_IEC(IEC1bits.MI2C1IE = 0);
+    IFS1bits.MI2C1IF = 0;
     I2C1STAT = 0x00;
 
     /*1. Start*/
     I2C1CONLbits.SEN = 1;
+    while(I2C1CONLbits.SEN == 1){}
+    //I2CWaitForInterrupt();
+    I2C1STAT = 0x00;
 
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
-
+    LATBbits.LATB4 = 0; //led off
+    __delay_ms(1000);
     /*2. Send address*/
     I2C1TRN = address;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
-
+    while(I2C1STATbits.TRSTAT == 1){}
+    //I2CWaitForInterrupt();
+    I2C1STAT = 0x00;
+    
     /*3. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
@@ -143,8 +150,8 @@ int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t
     }
     /*4. Send Index*/
     I2C1TRN = reg;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+    while(I2C1STATbits.TRSTAT == 1){}
+    //I2CWaitForInterrupt();
 
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -157,10 +164,8 @@ int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t
     for(; i < count; i++){
         /*6. send data*/
         I2C1TRN = pdata[i];
-        //while(I2C1STATbits.TRSTAT == 1);
-
-        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-        IFS1bits.MI2C1IF = 0;
+        //I2CWaitForInterrupt();
+        while(I2C1STATbits.TRSTAT == 1){}
 
         /*Check for ack*/
         if(I2C1STATbits.ACKSTAT != 0){
@@ -172,8 +177,12 @@ int8_t VL53L0X_write_multi(uint8_t address, uint8_t reg, uint8_t *pdata, int32_t
 
     /*8. Send stop*/
     I2C1CONLbits.PEN = 1;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+        while(I2C1STATbits.TRSTAT == 1){}
+
+    //I2CWaitForInterrupt();    
+    
+    /* Disables interrupts for I2C1 */
+    //IEC1bits.MI2C1IE = 0;
 
     return STATUS_OK;
 }
@@ -182,11 +191,11 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
 {
     /*1. Start*/
     I2C1CONLbits.SEN = 1;
-
+    while(I2C1CONLbits.SEN == 1){}
+    
     /*2. Send address */
     I2C1TRN = address;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+    while(I2C1STATbits.TRSTAT == 1){} /*Wait for interrupt*/
     
     /*3. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -196,8 +205,7 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
     }
     /*4. Send Index*/
     I2C1TRN = index;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+    while(I2C1STATbits.TRSTAT == 1){} /*Wait for interrupt*/
 
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
@@ -205,33 +213,34 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
         I2C1CONLbits.PEN = 1;
         return STATUS_FAIL;
     }
-
-    /*6. Enters receiving mode*/
-    I2C1CONLbits.RCEN = 1;
 
     /*7. Send repeated start*/
     I2C1CONLbits.RSEN = 1;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+    while(I2C1CONLbits.RSEN == 1){} /*Wait for interrupt*/
     
     /*8. Send address + 1 for reading*/
     I2C1CONL = address+1;
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+    while(I2C1STATbits.TRSTAT == 1){} /*Wait for interrupt*/
     
     /*5. Check for ack*/
     if(I2C1STATbits.ACKSTAT != 0){
         /*Error*/
         I2C1CONLbits.PEN = 1;
-        I2C1CONLbits.RCEN = 0;
         return STATUS_FAIL;
     }
 
+
+    
     uint8_t i = 0;
     for(; i < count; i++){
+        while( (I2C1CONL & 0b0000000000011111) != 0){}
+        
+        /*6. Enters receiving mode*/
+        I2C1CONLbits.RCEN = 1;
+        
         /*9. gets data*/
-        while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-        IFS1bits.MI2C1IF = 0;
+        while(I2C1CONLbits.RCEN == 1){} /*Wait for interrupt*/
+
         pdata[i] = I2C1RCV;
         
         /*Sends ack*/
@@ -240,9 +249,7 @@ int8_t VL53L0X_read_multi(uint8_t address, uint8_t index, uint8_t *pdata, int32_
 
     /*8. Send stop*/
     I2C1CONLbits.PEN = 1;
-    I2C1CONLbits.RCEN = 0; /*leaves receive mode*/
-    while(IFS1bits.MI2C1IF == 0){} /*Wait for interrupt*/
-    IFS1bits.MI2C1IF = 0;
+
     
     return STATUS_OK;
 }
@@ -505,4 +512,16 @@ int8_t VL53L0X_get_timer_frequency(int32_t *ptimer_freq_hz){
 int8_t VL53L0X_get_timer_value(int32_t *ptimer_count){
        *ptimer_count = 0;
        return STATUS_FAIL;
+}
+
+void I2CWaitForInterrupt(){
+    if(IFS1bits.MI2C1IF == 0){
+        while(1){
+            if(IFS1bits.MI2C1IF != 0){
+                break;
+            }
+            __delay_us(100);
+        }
+        IFS1bits.MI2C1IF = 0;
+    }
 }

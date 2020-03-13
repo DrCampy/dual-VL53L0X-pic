@@ -49,6 +49,7 @@ volatile bool i2c_slave_ready = false;
 volatile bool isLeftReady = false, isRightReady = false;   
 bool i2cSecondaryAddress = false;
 
+
 extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
 VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,
@@ -85,6 +86,8 @@ int16_t main(void)
     ODCBbits.ODCB12 = 1;            /* Configure XSHUT_R as open-drain */
     TRISBbits.TRISB12 = 0;          /* Configure XSHUT_R as output */
     TRISBbits.TRISB4 = 0;           /* Configures LED pin as output */
+    ledOff();
+    __delay_ms(2000);
     
     if(DIPS[0] == false){ /*We are in run mode*/
         currentMode = RUN;
@@ -125,7 +128,7 @@ int16_t main(void)
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(LeftSensor, 0x52);    
     powerOnRightSensor();
-    
+    ledOn();
     StatusR = VL53L0X_DataInit(RightSensor);
     StatusL = VL53L0X_DataInit(LeftSensor);
     
