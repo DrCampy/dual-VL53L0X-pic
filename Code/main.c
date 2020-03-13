@@ -121,13 +121,9 @@ int16_t main(void)
     powerOnRightSensor(); /* Wake up right sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(RightSensor, 0x54);
-    powerOffRightSensor();
-
-    /* Configure left sensor address */
-    powerOnLeftSensor(); /* Wake up left sensor */
+    powerOnLeftSensor();
     __delay_ms(2); /* sensor needs 2 ms to wake up */
-    VL53L0X_SetDeviceAddress(LeftSensor, 0x52);    
-    powerOnRightSensor();
+    
     ledOn();
     StatusR = VL53L0X_DataInit(RightSensor);
     StatusL = VL53L0X_DataInit(LeftSensor);
