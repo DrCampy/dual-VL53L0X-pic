@@ -50,6 +50,10 @@ void I2CSlaveInit(uint8_t address){
     
     /* Enables module */
     I2C2CONLbits.I2CEN = 1;
+    
+    /* Enables interrupts */
+    IEC3bits.SI2C2IE = 1;
+
 }
 
 //If master sends NACK after we sent data, the module will not generate interrupt.

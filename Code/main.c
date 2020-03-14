@@ -73,12 +73,10 @@ int16_t main(void)
     RCON = 0x2000;
     DataEEInit();                   /* Initialize EEprom Emulator */
     initVL53L0X();                  /* Initialize sensors sructures */
+    configureInterrupts();
     DIPS[0] = PORTBbits.DIP1pin;    /* Calibration Mode */
     DIPS[1] = PORTBbits.DIP2pin;    /* LED Mode or Cal Data Management */
     DIPS[2] = PORTBbits.DIP3pin;    /* Slave I2C address */  
-    RPINR1 = 0xDE;                  /* Sensors Interrupts config register */
-                                    /* RB13 = INT_R = RP13 = INT2
-                                     * RB14 = INT_L = RP14 = INT3*/
     ANSBbits.ANSB15 = 0;            /* Configure XSHUT_L as digital */
     ODCBbits.ODCB15 = 1;            /* Configure XSHUT_L as open-drain */
     TRISBbits.TRISB15 = 0;          /* Configure XSHUT_L as output */
@@ -320,13 +318,8 @@ int16_t main(void)
             I2CSlaveInit(slaveI2CAddress);
             
             //Enable interrupts for slave I2C and both sensors
-            IEC3bits.SI2C2IE = 1;
             IEC1bits.INT2IE = 1;
             IEC3bits.INT3IE = 1;
-            
-            //Configure interrupt pin
-            TRISBbits.TRISB11 = 0; //Configures as output
-            resetInt(); //Reset int before main code execution
             
             /*Main loop*/
             while(1){                

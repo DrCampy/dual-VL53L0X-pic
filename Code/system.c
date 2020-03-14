@@ -15,9 +15,9 @@
     #endif
 #endif
 
-#include "system.h"          /* variables/params used by system.c */
 #include <stdbool.h>
-
+#include "system.h"          /* variables/params used by system.c */
+#include "sensor.h"
 /******************************************************************************/
 /* System Level Functions                                                     */
 /*                                                                            */
@@ -79,3 +79,13 @@ void ConfigureOscillator(void)
     while (OSCCONbits.LOCK != 1);
 }
 
+void configureInterrupts(){
+
+    //Configures interrupts for tof sensors
+    RPINR1bits.INT2R = 13;          /* Configure pin for interrupt INT2 */
+    RPINR1bits.INT3R = 14;          /* Configure pin for interrupt INT3 */
+
+    //Configure interrupt pin for reader
+    TRISBbits.TRISB11 = 0; //Configures as output
+    resetInt(); //Reset int  main code execution
+}
