@@ -158,13 +158,7 @@
 extern volatile bool i2c_slave_ready;
 extern volatile bool isLeftReady, isRightReady;
 
-//void __attribute__((interrupt,auto_psv)) _MI2C1Interrupt(void){
-/*
-void _ISR _MI2C1Interrupt(void){
-    LATBbits.LATB4 ^= 1;
-}*/
-
-/* Interrupt of right sensor */
+/* Interrupt of right sensor (RB13) */
 void __attribute__((interrupt,no_auto_psv)) _INT2Interrupt(void){
     isRightReady = 1;
     IFS1bits.INT2IF = 0; //Lower interrupt flag
