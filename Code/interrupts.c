@@ -16,7 +16,11 @@
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition */
-#include <stdbool.h>       /* Includes true/false definition */
+#include <stdbool.h>
+#include "system.h"
+#include <libpic30.h>
+#include "sensor.h"
+
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
