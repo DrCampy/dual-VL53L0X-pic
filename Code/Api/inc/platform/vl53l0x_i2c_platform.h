@@ -165,9 +165,8 @@ int8_t VL53L0X_read_multi(uint8_t address,  uint8_t index, uint8_t  *pdata, int3
  * @return status - SystemVerilog status 0 = ok, 1 = error
  *
  */
-#define VL53L0X_write_byte(address, index, data) VL53L0X_write_multi(address, index, &data, 1)
 
-//int8_t VL53L0X_write_byte(uint8_t address,  uint8_t index, uint8_t   data);
+int8_t VL53L0X_write_byte(uint8_t address,  uint8_t index, uint8_t   data);
 
 
 /**
