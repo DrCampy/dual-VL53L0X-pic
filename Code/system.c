@@ -84,7 +84,13 @@ void configureInterrupts(){
     //Configures interrupts for tof sensors
     RPINR1bits.INT2R = 13;          /* Configure pin for interrupt INT2 */
     RPINR1bits.INT3R = 14;          /* Configure pin for interrupt INT3 */
-
+    INTCON2bits.INT2EP = 1;         /* INT2 is falling edge polarity */
+    INTCON2bits.INT3EP = 1;         /* INT3 is falling edge polarity */
+    ANSBbits.ANSB13 = 0;            /* Configure RB13 as digital */
+    ANSBbits.ANSB14 = 0;            /* Configure RB14 as digital */
+    TRISBbits.TRISB13 = 1;          /* Configure RB13 as intput */
+    TRISBbits.TRISB14 = 1;          /* Configure RB14 as intput */
+    
     //Configure interrupt pin for reader
     TRISBbits.TRISB11 = 0; //Configures as output
     resetInt(); //Reset int  main code execution

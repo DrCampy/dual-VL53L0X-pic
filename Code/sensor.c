@@ -87,22 +87,22 @@ void powerOnLeftSensor(){
  */
 void setConfigL(uint8_t config_l){
     // L_EN flag
-    L_ENflag = (config_l &= L_EN) != 0;
+    L_ENflag = (config_l & L_EN) != 0;
     
     //R_EN flag
-    R_ENflag = (config_l &= R_EN) != 0;
+    R_ENflag = (config_l & R_EN) != 0;
     
     //XTALK Flag
-    XTALKflag = (config_l &= XTALK) != 0;
+    XTALKflag = (config_l & XTALK) != 0;
     
     //AUTO_INT flag
-    AUTO_INCflag = (config_l &= AUTO_INC) != 0;
+    AUTO_INCflag = (config_l & AUTO_INC) != 0;
     
     //CONT_MODE flag
-    CONT_MODEflag = (config_l &= CONT_MODE) != 0;
+    CONT_MODEflag = (config_l & CONT_MODE) != 0;
     
     //CONV_FLAG
-    CONVflag = (config_l &= CONV) != 0;
+    CONVflag = (config_l & CONV) != 0;
     
     CONFIG_UPDATEDflag = true;
 }
@@ -112,7 +112,7 @@ void setConfigH(uint8_t config_h){
     INT_MODEflags = (config_h & 0b11000000) >> 6;
     
     //DURATION value
-    DURATIONval = (config_h & 0b00111111) >> 6;
+    DURATIONval = (config_h & 0b00111111);
 
     CONFIG_UPDATEDflag = true;
 }
@@ -167,45 +167,49 @@ void updateConfig(){ //static variables for previous states
     if(CONFIG_UPDATEDflag == false){
         return; //COnfig was not updated since last execution
     }
+
     // L_EN flag
-    if(L_ENflag){
-        powerOnLeftSensor();
-    }else{
-        powerOffLeftSensor();
+    if(prev_L_ENflag != L_ENflag){
+        if(L_ENflag){
+            powerOnLeftSensor();
+        }else{
+            powerOffLeftSensor();
+        }    
+        prev_L_ENflag = L_ENflag;
     }
     
     //R_EN flag
-    if(R_ENflag){
-        powerOnRightSensor();
-    }else{
-        powerOffRightSensor();
+    if(prev_R_ENflag != R_ENflag){
+        if(R_ENflag){
+            powerOnRightSensor();
+        }else{
+            powerOffRightSensor();
+        }
+        prev_R_ENflag = R_ENflag;
     }
     
     //XTALK Flag
-    if(XTALKflag){
-        enableXTalk();
-    }else{
-        disableXTalk();
+    if(prev_XTALKflag != XTALKflag){
+        if(XTALKflag){
+            enableXTalk();
+        }else{
+            disableXTalk();
+        }    
+        prev_XTALKflag = XTALKflag;
     }
     
-    //CONT_MODE flag
-    if(CONT_MODEflag){
-
-    }else{
-
-    }
-    
-    //CONV_FLAG
-    if(CONVflag){
-
-    }else{
-
-    }
+    //INT_MODE, CONV, CONT_MODE are managed automatically by the main code and
+    // do not need to be "applied".
 
     //DURATION
-    uint32_t totDuration = 1000*(20+DURATIONval*3);
-    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
-    VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
+    if(prev_DURATIONval != DURATIONval){
+        uint32_t totDuration = 1000*(20+DURATIONval*3);
+        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
+        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
+        prev_DURATIONval = DURATIONval;
+    }
+    
+    CONFIG_UPDATEDflag = false;
 }
 
 /*
