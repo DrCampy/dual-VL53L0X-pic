@@ -52,8 +52,8 @@ extern "C" {
     extern uint8_t leftDist;
     extern uint8_t rightDist;
     extern uint8_t avgDist;
-    extern uint8_t *minDist;
-    extern uint8_t *maxDist;
+    extern uint8_t minDist;
+    extern uint8_t maxDist;
     
     void powerOffRightSensor();
     void powerOnRightSensor();

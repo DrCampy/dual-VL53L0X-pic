@@ -23,6 +23,12 @@
  */
 #define DEBUG
 
+/* Define to be sure the fuching parser does not grey-out all the code because
+    MPLAB is dumb. */
+#ifndef USE_I2C_2V8
+#define USE_I2C_2V8
+#endif
+
 //#define USE_I2C_1V8
 #ifndef USE_I2C_2V8 //Must be defined at compilation level.
 #ifndef USE_I2C_1V8
@@ -46,7 +52,8 @@ void loadCalData();
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
-volatile bool isLeftReady = false, isRightReady = false;   
+volatile bool isLeftReady = false, isRightReady = false;
+volatile bool isRightRunning = false, isLeftRunning = false;
 bool i2cSecondaryAddress = false;
 
 
@@ -288,62 +295,62 @@ int16_t main(void)
             
         case RUN: ;
             VL53L0X_RangingMeasurementData_t RightMeasurement, LeftMeasurement;
-            bool isRightRunning = 0;
-            bool isLeftRunning = 0;
-            bool leftUpdated = 0, rightUpdated = 0;
+            bool leftUpdated = false, rightUpdated = false;
             
             /* Load calibration data + perform reference calibration */
             loadCalData();    
 
             /* Configures devices */
-            StatusR = VL53L0X_SetDeviceMode(RightSensor,
+            StatusR &= VL53L0X_SetDeviceMode(RightSensor,
                         VL53L0X_DEVICEMODE_SINGLE_RANGING);
-            StatusL = VL53L0X_SetDeviceMode(LeftSensor,
+            StatusL &= VL53L0X_SetDeviceMode(LeftSensor,
                         VL53L0X_DEVICEMODE_SINGLE_RANGING);
-            StatusR = VL53L0X_SetGpioConfig(RightSensor, 0,
+            StatusR &= VL53L0X_SetGpioConfig(RightSensor, 0,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
-                    VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_HIGH,
-                    VL53L0X_INTERRUPTPOLARITY_HIGH);
-            StatusL = VL53L0X_SetGpioConfig(LeftSensor, 0,
+                    VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY,
+                    VL53L0X_INTERRUPTPOLARITY_LOW);
+            StatusL &= VL53L0X_SetGpioConfig(LeftSensor, 0,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
-                    VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_HIGH,
-                    VL53L0X_INTERRUPTPOLARITY_HIGH);
-            StatusR = VL53L0X_SetInterruptThresholds(RightSensor,
+                    VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY,
+                    VL53L0X_INTERRUPTPOLARITY_LOW);
+            StatusR &= VL53L0X_SetInterruptThresholds(RightSensor,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
                     (FixPoint1616_t)0.0, (FixPoint1616_t)50);
-            StatusL = VL53L0X_SetInterruptThresholds(LeftSensor,
+            StatusL &= VL53L0X_SetInterruptThresholds(LeftSensor,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
                     (FixPoint1616_t)0.0, (FixPoint1616_t)50);
             I2CSlaveInit(slaveI2CAddress);
             
             //Enable interrupts for slave I2C and both sensors
+            IFS1bits.INT2IF = 0;
             IEC1bits.INT2IE = 1;
+            IFS3bits.INT3IF = 0;
             IEC3bits.INT3IE = 1;
             
             /*Main loop*/
             while(1){                
                 // Start a measurement
                 if(CONVflag){
+                    ledOn();
                     //Right Sensor
-                    if(R_ENflag && !isRightRunning && !isLeftRunning){
-                        StatusR = VL53L0X_StartMeasurement(RightSensor);
+                    if(R_ENflag && !isRightRunning && !isRightReady && !isLeftRunning && !rightUpdated){
                         isRightRunning = true;
+                        StatusR &= VL53L0X_StartMeasurement(RightSensor);
                     }
                     
                     //Left Sensor
-                    if(L_ENflag && !isLeftRunning && !isRightRunning){
-                        StatusL = VL53L0X_StartMeasurement(LeftSensor);
+                    if(L_ENflag && !isLeftRunning && !isLeftReady && !isRightRunning && !leftUpdated){
                         isLeftRunning = true;
+                        StatusL &= VL53L0X_StartMeasurement(LeftSensor);
                     }
                 }
                 
                 // Recovers measurements (right)
                 if(isRightReady){
-                    isRightRunning = false;
                     //Get measurement data from right sensor
-                    VL53L0X_GetRangingMeasurementData(RightSensor,
+                    StatusR &= VL53L0X_GetRangingMeasurementData(RightSensor,
                                 &RightMeasurement);
-                    VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
+                    StatusR &= VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
                         rightDist = (uint8_t)(RightMeasurement.RangeMilliMeter)/10;
                     }
@@ -355,14 +362,13 @@ int16_t main(void)
                 // Recovers measurements (left)
                 if(isLeftReady){
                     //Get measurement data from left sensor
-                    StatusL = VL53L0X_GetRangingMeasurementData(LeftSensor,
+                    StatusL &= VL53L0X_GetRangingMeasurementData(LeftSensor,
                                 &LeftMeasurement);
-                    VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
+                    StatusL &= VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
                     if(LeftMeasurement.RangeStatus == 0){
                         leftDist = (uint8_t)(LeftMeasurement.RangeMilliMeter)/10;
                     }
                     updateSpecialMeasurements();
-                    isLeftRunning = false;
                     leftUpdated = true;
                     isLeftReady = false;
                 }
@@ -378,14 +384,15 @@ int16_t main(void)
                     
                     //full measurement performed, raise flag
                     CONV_FINISHEDflag = true;
-                    if(!CONT_MODEflag){ 
+                    if(!CONT_MODEflag){ //TODO update flags only if measurement was correct ?
                         CONVflag = 0;
+                        ledOff();
                     }
                     
                     //Reset status 
                     rightUpdated = false;
                     leftUpdated = false;
-                }else if(rightCond || leftCond){
+                }else if(rightUpdated || leftUpdated){
                     //Raise interrupt if we have a new measurement and int is
                     //configured so
                     if(INT_MODEflags == INT_L_OR_R){
@@ -397,8 +404,8 @@ int16_t main(void)
                 
                 //Manages I2C
                 if(i2c_slave_ready == true){
-                    I2CSlaveExec();
                     i2c_slave_ready = false;
+                    I2CSlaveExec();
                 } 
                 
                 // Applies the config that may have been updated by I2C
@@ -428,9 +435,11 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 void updateSpecialMeasurements(){
     // Update min and max
     if(rightDist < leftDist){
-        minDist = &rightDist;
+        minDist = rightDist;
+        maxDist = leftDist;
     }else{
-        maxDist = &leftDist;
+        minDist = leftDist;
+        maxDist = rightDist;
     }
     avgDist = (rightDist + leftDist)/2;
 }
