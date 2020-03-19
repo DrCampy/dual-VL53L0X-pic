@@ -19,8 +19,6 @@
 #include <stdbool.h>
 #include "system.h"
 #include <libpic30.h>
-#include "sensor.h"
-
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
