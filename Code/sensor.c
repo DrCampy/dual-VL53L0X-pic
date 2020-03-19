@@ -8,29 +8,28 @@ VL53L0X_Dev_t __RightSensor_, __LeftSensor_;
 VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
 /* Config Updated flag */
-bool CONFIG_UPDATEDflag = 1;
+bool CONFIG_UPDATEDflag = 1; //Run updateConfig() at least once
 
 /*Config low register*/
-bool L_ENflag = 1;
-bool R_ENflag = 1;
-bool XTALKflag = 0;
-bool AUTO_INCflag = 0;
-bool CONT_MODEflag = 0;
-bool CONVflag = 0;
-bool CONV_FINISHEDflag = 0;
+bool prev_L_ENflag      = 1, L_ENflag   = 1;
+bool prev_R_ENflag      = 1, R_ENflag   = 1;
+bool prev_XTALKflag     = 0, XTALKflag  = 0;
+bool AUTO_INCflag       = 0;
+bool CONT_MODEflag      = 0;
+bool CONVflag           = 0;
+bool CONV_FINISHEDflag  = 0;
 
 /*Config high register*/
-uint8_t INT_MODEflags = 00; /* 2 bits */
-uint8_t DURATIONval; /* 6 bits */
-
-uint8_t I2C_ADDRESSvalue;
+uint8_t INT_MODEflags       = 00; /* 2 bits initially at no-interrupt*/
+uint8_t prev_DURATIONval    = 4, DURATIONval = 4; /* 6 bits */
+uint8_t I2C_ADDRESSvalue    = 0x42;
 
 /* Distances */
-uint8_t leftDist = 0;
-uint8_t rightDist = 0;
-uint8_t avgDist = 0;
-uint8_t *minDist;
-uint8_t *maxDist;
+uint8_t leftDist    = 0;
+uint8_t rightDist   = 0;
+uint8_t avgDist     = 0;
+uint8_t minDist;
+uint8_t maxDist;
 
 void powerOffRightSensor(){
     LATBbits.LATB12 = 0;
@@ -82,7 +81,7 @@ void powerOnLeftSensor(){
  * DURATION<0:5>:
  * Determines the max duration allocated to each measurement.
  * Final duration is:
- * 20ms + DURATION<0:5>ms
+ * 20ms + 3*DURATION<0:5>ms
  * Ranges from 20ms to 84ms
  * 
  */
@@ -164,7 +163,7 @@ uint8_t getConfigH(){
     return configH;
 }
 
-void updateConfig(){
+void updateConfig(){ //static variables for previous states
     if(CONFIG_UPDATEDflag == false){
         return; //COnfig was not updated since last execution
     }

@@ -8,12 +8,12 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "config.h"        /* Configuration definitions                       */
 #include <libpic30.h>
-#include <p24FJ256GA702.h>
 #include "Api/inc/core/vl53l0x_api.h" /*VL53L0X Api                           */
 #include "data_storage.h"
 #include "DEEE/Include/DEE Emulation 16-bit/DEE Emulation 16-bit.h"
 #include "sensor.h"
 #include "SlaveI2C.h"
+
 
 /*
  * Uncomment to enable debug mode.
@@ -61,7 +61,8 @@ VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,
 
 int16_t main(void)
 {
-    ConfigureOscillator();          /* Configure the oscillator */
+    /* Configure the oscillator */
+    ConfigureOscillator();          
 
     /* Declarations */
     bool DIPS[3];
@@ -84,9 +85,8 @@ int16_t main(void)
     ODCBbits.ODCB12 = 1;            /* Configure XSHUT_R as open-drain */
     TRISBbits.TRISB12 = 0;          /* Configure XSHUT_R as output */
     TRISBbits.TRISB4 = 0;           /* Configures LED pin as output */
-    ledOff();
-    __delay_ms(2000);
     
+    /* Detect in which mode we are */
     if(DIPS[0] == false){ /*We are in run mode*/
         currentMode = RUN;
         ledMode = DIPS[1];
@@ -113,7 +113,7 @@ int16_t main(void)
             currentMode = RST;
         }
     }
-    
+
     /* Configure right sensor address */
     powerOffLeftSensor(); /* Put left sensor to sleep */
     powerOnRightSensor(); /* Wake up right sensor */
@@ -122,7 +122,6 @@ int16_t main(void)
     powerOnLeftSensor();
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     
-    ledOn();
     StatusR = VL53L0X_DataInit(RightSensor);
     StatusL = VL53L0X_DataInit(LeftSensor);
     
@@ -144,7 +143,7 @@ int16_t main(void)
     switch(currentMode){
         case SPAD_CAL: ;
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(2, 1000, 500); /* 2 blinks of 1s, 0.5s apart */
+            blinkStatusLed(2, 500, 500); /* 2 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while calibration performed */
             ledOn();
@@ -183,7 +182,7 @@ int16_t main(void)
             checkError(5);
             
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(3, 1000, 500); /* 3 blinks of 1s, 0.5s apart */
+            blinkStatusLed(3, 500, 500); /* 3 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while calibration performed */
             ledOn();
@@ -229,7 +228,7 @@ int16_t main(void)
                         offsetMicroMeterL);
             checkError(6);
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(4, 1000, 500); /* 4 blinks of 1s, 0.5s apart */
+            blinkStatusLed(4, 500, 500); /* 4 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while measurement performed */
             LATBbits.LATB4 = 1;
@@ -250,7 +249,7 @@ int16_t main(void)
             break;
         case RST: ;            
             /* Lights LED to tell the user the reset will begin */
-            blinkStatusLed(5, 1000, 500); /* 5 blinks of 1s, 0.5s apart */
+            blinkStatusLed(5, 500, 500); /* 5 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while reset performed */
             ledOn();
@@ -346,7 +345,7 @@ int16_t main(void)
                                 &RightMeasurement);
                     VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
-                        rightDist = (uint8_t)RightMeasurement.RangeMilliMeter/1000;
+                        rightDist = (uint8_t)(RightMeasurement.RangeMilliMeter)/10;
                     }
                     updateSpecialMeasurements();
                     rightUpdated = true;
@@ -360,7 +359,7 @@ int16_t main(void)
                                 &LeftMeasurement);
                     VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
                     if(LeftMeasurement.RangeStatus == 0){
-                        leftDist = (uint8_t)LeftMeasurement.RangeMilliMeter/1000;
+                        leftDist = (uint8_t)(LeftMeasurement.RangeMilliMeter)/10;
                     }
                     updateSpecialMeasurements();
                     isLeftRunning = false;
@@ -369,8 +368,8 @@ int16_t main(void)
                 }
                 
                 //Updates interrupt state, CONV and CONF_FINISHED flags
-                bool rightCond = rightUpdated || !R_EN;
-                bool leftCond = leftUpdated || !L_EN;
+                bool rightCond = rightUpdated || !R_ENflag;
+                bool leftCond = leftUpdated || !L_ENflag;
                 if(rightCond && leftCond){
                     //Raise interrupt if they are not disabled.
                     if(INT_MODEflags != INT_OFF){
@@ -387,6 +386,8 @@ int16_t main(void)
                     rightUpdated = false;
                     leftUpdated = false;
                 }else if(rightCond || leftCond){
+                    //Raise interrupt if we have a new measurement and int is
+                    //configured so
                     if(INT_MODEflags == INT_L_OR_R){
                         raiseInt();
                     }
