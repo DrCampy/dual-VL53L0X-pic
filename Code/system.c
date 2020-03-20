@@ -39,8 +39,8 @@ void ConfigureOscillator(void)
 {
     //MCC generated code
 
-    // CPDIV 1:2; PLLEN disabled; DOZE 1:8; RCDIV FRC; DOZEN disabled; ROI disabled; 
-    CLKDIV = 0x3040;
+    // CPDIV 1:1; PLLEN disabled; DOZE 1:8; RCDIV FRCPLL; DOZEN disabled; ROI disabled; 
+    CLKDIV = 0x3100;
     // STOR disabled; STORPOL Interrupt when STOR is 1; STSIDL disabled; STLPOL Interrupt when STLOCK is 1; STLOCK disabled; STSRC SOSC; STEN disabled; TUN Center frequency;
     OSCTUN = 0x00;
     // ROEN disabled; ROSWEN disabled; ROSEL FOSC; ROOUT disabled; ROSIDL disabled; ROSLP disabled;
