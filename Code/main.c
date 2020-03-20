@@ -23,13 +23,8 @@
  */
 #define DEBUG
 
-/* Define to be sure the fuching parser does not grey-out all the code because
-    MPLAB is dumb. */
-#ifndef USE_I2C_2V8
-#define USE_I2C_2V8
-#endif
+//#define USE_I2C_1V8 //Uncomment to use 1.8V I2C
 
-//#define USE_I2C_1V8
 #ifndef USE_I2C_2V8 //Must be defined at compilation level.
 #ifndef USE_I2C_1V8
 #error "Voltage not defined !"
@@ -331,7 +326,6 @@ int16_t main(void)
             while(1){                
                 // Start a measurement
                 if(CONVflag){
-                    ledOn();
                     //Right Sensor
                     if(R_ENflag && !isRightRunning && !isRightReady && !isLeftRunning && !rightUpdated){
                         isRightRunning = true;
@@ -386,7 +380,6 @@ int16_t main(void)
                     CONV_FINISHEDflag = true;
                     if(!CONT_MODEflag){ //TODO update flags only if measurement was correct ?
                         CONVflag = 0;
-                        ledOff();
                     }
                     
                     //Reset status 
