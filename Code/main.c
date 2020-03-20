@@ -352,7 +352,7 @@ int16_t main(void)
                                 &RightMeasurement);
                     StatusR &= VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
-                        rightDist = (uint8_t)(RightMeasurement.RangeMilliMeter)/10;
+                        rightDist = RightMeasurement.RangeMilliMeter/10;
                     }
                     updateSpecialMeasurements();
                     rightUpdated = true;
@@ -366,7 +366,7 @@ int16_t main(void)
                                 &LeftMeasurement);
                     StatusL &= VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
                     if(LeftMeasurement.RangeStatus == 0){
-                        leftDist = (uint8_t)(LeftMeasurement.RangeMilliMeter)/10;
+                        leftDist = LeftMeasurement.RangeMilliMeter/10;
                     }
                     updateSpecialMeasurements();
                     leftUpdated = true;
