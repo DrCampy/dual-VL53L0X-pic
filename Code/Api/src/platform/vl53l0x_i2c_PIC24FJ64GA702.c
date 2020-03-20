@@ -74,9 +74,9 @@ int8_t VL53L0X_i2c_init(void)
 {
     // Baud rate generator for 100kHz I2C
 #if(FCY == 16000000L)
-    I2C1BRG = 0x4E; /* If Fosc = 32MHz / FCY = 16MHz */
+    I2C1BRG = 0x12; /* 4e If Fosc = 32MHz / FCY = 16MHz or 0x12 for 400*/ 
 #elif(FCY == 8000000L)
-    I2C1BRG = 0x26; /* If Fosc = 16MHz / FCY = 8MHz */
+    I2C1BRG = 0x08; /* 26 If Fosc = 16MHz / FCY = 8MHz or 0x08 for 400 */
 #else
 #error I2C not setup for selected FCY frequency.
 #endif
