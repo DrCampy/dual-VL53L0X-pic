@@ -123,7 +123,7 @@ section                    address   length (PC units)   length (bytes) (dec)
 .text                        0x100               0x478           0x6b4  (1716)
 .text                        0x578               0x232           0x34b  (843)
 .init.delay32                0x7aa                0x1c            0x2a  (42)
-_000000000563FAA05e750be4     0x800              0x1000          0x1800  (6144)
+_000000000565AAA05e751069     0x800              0x1000          0x1800  (6144)
 .const                      0x1800               0x454           0x67e  (1662)
 .text                       0x1c54              0x7082          0xa8c3  (43203)
 .text                       0x8cd6               0x43a           0x657  (1623)
@@ -2707,9 +2707,9 @@ __c30_signature
 
 .aivt._AltMathError%27
 
-_000000000563FAA05e750be4
+_000000000565AAA05e751069
                     0x8800       0x1000 load address 0x000800  
- _000000000563FAA05e750be4
+ _000000000565AAA05e751069
                     0x8800       0x1000 build/default/production/src/DEEE/DEE Emulation 16-bit/DEE Emulation 16-bit.o
                     0x8800                  _emulationPages
 
