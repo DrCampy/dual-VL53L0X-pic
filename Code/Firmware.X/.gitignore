@@ -1,0 +1,8 @@
+# Ignores build files
+/build/
+
+# Ignores diverse project files created at compile time
+/dist/
+/nbproject/private/
+/nbproject/Package-*.bash
+/nbproject/Makefile-*
