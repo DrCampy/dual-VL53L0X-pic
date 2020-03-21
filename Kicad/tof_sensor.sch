@@ -1310,7 +1310,7 @@ U 1 1 5DEF33BD
 P 7650 6250
 F 0 "TP8" H 7803 6351 50  0000 L CNN
 F 1 "TestPoint_Probe" H 7803 6260 50  0000 L CNN
-F 2 "Measurement_Points:Measurement_Point_Round-SMD-Pad_Small" H 7850 6250 50  0001 C CNN
+F 2 "Measurement_Points:Test_Point_Keystone_5010-5014_Multipurpose" H 7850 6250 50  0001 C CNN
 F 3 "~" H 7850 6250 50  0001 C CNN
 	1    7650 6250
 	1    0    0    -1  
@@ -1539,6 +1539,19 @@ F 1 "Q_NMOS_SGD" H 4404 6505 50  0000 L CNN
 F 2 "TO_SOT_Packages_SMD:TSOT-23_HandSoldering" H 4400 6650 50  0001 C CNN
 F 3 "~" H 4200 6550 50  0001 C CNN
 	1    4200 6550
+	1    0    0    -1  
+$EndComp
+Text Label 8800 6450 2    50   ~ 0
+INT_OUT_VDD
+$Comp
+L Connector:TestPoint_Probe TP6
+U 1 1 5E8665A7
+P 8800 6450
+F 0 "TP6" H 8953 6551 50  0000 L CNN
+F 1 "TestPoint_Probe" H 8953 6460 50  0000 L CNN
+F 2 "Measurement_Points:Test_Point_Keystone_5010-5014_Multipurpose" H 9000 6450 50  0001 C CNN
+F 3 "~" H 9000 6450 50  0001 C CNN
+	1    8800 6450
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
