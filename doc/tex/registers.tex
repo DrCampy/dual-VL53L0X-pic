@@ -1,0 +1,68 @@
+Description of the I2C registers.
+\subsection{\texttt{CONFIG\_L}: Configuration register (low part)}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} |c|c|c|c|c|c|c|c|}
+\hline
+0x00 & \multicolumn{7}{c|}{$\texttt{CONFIG\_L}$}\\
+\hline
+BIT 7 & BIT 6 & BIT 5 & BIT 4 & BIT 3 & BIT 2 & BIT 1 & BIT 0 \\ 
+\hline
+\texttt{L\_EN} & \texttt{R\_EN} & \texttt{XTALK} & \texttt{AUTO\_INC} & \texttt{CONT\_MODE} & \texttt{CONV} & \texttt{CONV\_FINISHED} & \texttt{unused}\\
+\hline
+\end{tabular*}\\
+\\
+Description of the content of the register:
+\begin{description}
+	\item[\texttt{L\_EN}] \qquad \textbf{Readable / Writeable / Initialize at 1}\\
+	Set this bit to 1 to enable the left sensor.\\
+	Set this bit to 0 to disable the left sensor.
+	
+	\item[\texttt{R\_EN}] \qquad \textbf{Readable / Writeable / Initialize at 1}\\
+	Set this bit to 1 to enable the right sensor.\\
+	Set this bit to 0 to disable the right sensor.
+	
+	\item[\texttt{XTALK}] \qquad \textbf{Readable / Writeable / Initialize at 0}\\
+	Set this bit to 1 to enable crosstalk compensation on both sensors.\\
+	Set this bit to 0 to disable crosstalk compensation on both sensors.\\
+	More information on crosstalk can be found in the VL53L0X API manual.
+	%%TODO add reference.
+	
+	\item[\texttt{AUTO\_INC}] \qquad \textbf{Readable / Writeable / Initialize at 0}\\
+	Set this bit to 1 to enable I2C auto incrementation of the registers.\\
+	Set this bit to 0 to disable I2C auto incrementation of the registers.\\
+	Auto incrementation of the registers will automatically increment the internal register pointer after a read or a write. The pointer will cycle through the configuration registers if it was initially pointing to a configuration register (and go back to the first config register if it reached the last config register). The pointer will cycle through the data registers if it was initially pointing to a data register (and go back to the first data register if reached the last data register).
+	
+	\item[\texttt{CONT\_MODE}] \qquad \textbf{Readable / Writeable / Initialize at 0}\\
+	Set this bit to 1 to enable continuous measurement mode.\\
+	Set this bit to 0 to disable continuous measurement mode.\\
+	Continuous measurement mode will start a new measurement as soon as the last measurement is over. It will also raise the interrupt after each measurement (depending on the interrupt setting) if the interrupt was reset. 
+	
+	\item[\texttt{CONV}] \qquad \textbf{Readeable / Writeable / Hardware clearable / Initialize at 0}\\
+	Set this bit to 1 to start a measurement or start continuous measurement.\\
+	Set this bit to 0 to stop continuous measurement. If CONT\_MODE is disabled the sensor will automatically clear this bit once the measurement is over.
+	
+	\item[\texttt{CONF\_FINISHED}] \qquad \textbf{Read-only / Hardware settable / Hardware clearable / Initialize at 0}\\
+	Hardware set to 1 once the conversion is over. \\
+	Hardware set to 0 after an I2C read of a data register.
+\end{description}
+
+\subsection{\texttt{CONFIG\_H}: Configuration register (high part)}
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+0x01 & \multicolumn{7}{|c|}{$\texttt{CONFIG\_H}$}\\
+\hline
+BIT 7 & BIT 6 & BIT 5 & BIT 4 & BIT 3 & BIT 2 & BIT 1 & BIT 0 \\ 
+\hline
+\multicolumn{2}{|c|}{\texttt{INT\_MODE}} & \multicolumn{6}{c|}{\texttt{DURATION}}\\
+\hline
+\end{tabular} 
+
+Description :
+\begin{description}
+	\item[\texttt{INT\_MODE}] \qquad \textbf{Readable / Writeable / Initialize at 1}\\
+	Set this bit to 1 to enable the left sensor.\\
+	Set this bit to 0 to disable the left sensor.
+	
+	\item[\texttt{DURATION}] \qquad \textbf{Readable / Writeable / Initialize at 1}\\
+	Set this bit to 1 to enable the right sensor.\\
+	Set this bit to 0 to disable the right sensor.
+\end{description}

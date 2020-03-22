@@ -1,12 +1,15 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[margin=0.25in]{geometry}
+\usepackage[margin=0.5in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{courier}
+\usepackage{float}
 \usepackage{graphicx}
 \usepackage{multicol}
+\usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{xcolor}
 \usepackage{tikz}
@@ -16,10 +19,14 @@
 \begin{document}
 \maketitle
 
+
 \section{Introduction}
 	\input{description.tex}
 \section{Bill Of Material}
 	\input{bill-of-material.tex}
+%	\newpage
 \section{Layout}
 	\input{layout.tex}
+\section{Registers}
+	\input{registers.tex}
 \end{document}
