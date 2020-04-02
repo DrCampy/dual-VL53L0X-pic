@@ -1,32 +1,71 @@
 \documentclass[12pt,a4paper]{article}
-\usepackage[margin=0.5in]{geometry}
+\usepackage[margin=0.75in]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{courier}
+\usepackage{fancyhdr}
 \usepackage{float}
 \usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{makecell}
 \usepackage{multicol}
 \usepackage{multirow}
+\usepackage{pdfpages}
 \usepackage{tabularx}
 \usepackage{xcolor}
 \usepackage{tikz}
 
-\author{Frustrating Box}
-\title{VL53L0X based distance sensor - Datasheet}
-\begin{document}
-\maketitle
+\newcommand{\iic}{I\textsuperscript{2}C }
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand\theadalign{bc}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
 
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Hawkseye - Datasheet}
+\lfoot{Frustrating Box}
+\cfoot{\thepage / \pageref{LastPage}}
+\rfoot{\today}
+
+\begin{document}
+
+\input{title.tex}
 
 \section{Introduction}
-	\input{description.tex}
-\section{Bill Of Material}
-	\input{bill-of-material.tex}
-%	\newpage
+\input{description.tex}
+\pagebreak[3]
+
 \section{Layout}
-	\input{layout.tex}
+\input{layout.tex}
+\pagebreak[4]
+
+\section{Interfacing With the Sensor}
+\input{interfaces.tex}
+\pagebreak[3]
+
 \section{Registers}
-	\input{registers.tex}
+\input{registers.tex}
+\pagebreak[3]
+
+\section{Boot Configuration and Calibration Routines}
+\input{boot_conf.tex}
+\pagebreak[3]
+
+\section{Error codes}
+\input{errors.tex}
+
+\appendix
+\newpage
+\section{Bill Of Material}
+\input{bill-of-material.tex}
+
+\section{Electric Diagram}
+\includepdf[pages=-, landscape]{../documents/schematicV1.pdf}
+\input
+
 \end{document}
