@@ -11,17 +11,13 @@ VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 bool CONFIG_UPDATEDflag = 1; //Run updateConfig() at least once
 
 /*Config low register*/
-bool prev_L_ENflag      = 1, L_ENflag   = 1;
-bool prev_R_ENflag      = 1, R_ENflag   = 1;
-bool prev_XTALKflag     = 0, XTALKflag  = 0;
-bool AUTO_INCflag       = 0;
-bool CONT_MODEflag      = 0;
-bool CONVflag           = 0;
-bool CONV_FINISHEDflag  = 0;
+CONFIG_LBITS CONFIG_Lbits = {{0b11000000}}; //N.B. Old GCC bug forces use of {{.}}
+CONFIG_LBITS prevCONFIG_Lbits = {{0b11000000}};
 
 /*Config high register*/
-uint8_t INT_MODEflags       = 00; /* 2 bits initially at no-interrupt*/
-uint8_t prev_DURATIONval    = 4, DURATIONval = 4; /* 6 bits */
+CONFIG_HBITS CONFIG_Hbits = {{4}};
+CONFIG_HBITS prevCONFIG_Hbits = {{4}};
+
 uint8_t I2C_ADDRESSvalue    = 0x42;
 
 /* Distances */
@@ -86,34 +82,14 @@ void powerOnLeftSensor(){
  * 
  */
 void setConfigL(uint8_t config_l){
-    // L_EN flag
-    L_ENflag = (config_l & L_EN) != 0;
-    
-    //R_EN flag
-    R_ENflag = (config_l & R_EN) != 0;
-    
-    //XTALK Flag
-    XTALKflag = (config_l & XTALK) != 0;
-    
-    //AUTO_INT flag
-    AUTO_INCflag = (config_l & AUTO_INC) != 0;
-    
-    //CONT_MODE flag
-    CONT_MODEflag = (config_l & CONT_MODE) != 0;
-    
-    //CONV_FLAG
-    CONVflag = (config_l & CONV) != 0;
+    CONFIG_Lbits.value = (config_l & 0b11111100); ;
     
     CONFIG_UPDATEDflag = true;
 }
 
 void setConfigH(uint8_t config_h){
-    //INT_MODE flags
-    INT_MODEflags = (config_h & 0b11000000) >> 6;
+    CONFIG_Hbits.value = config_h;
     
-    //DURATION value
-    DURATIONval = (config_h & 0b00111111);
-
     CONFIG_UPDATEDflag = true;
 }
 
@@ -128,39 +104,11 @@ void disableXTalk(){
 }
 
 uint8_t getConfigL(){
-    uint8_t configL = 0;
-    if(L_ENflag){
-        configL += L_EN;
-    }
-    if(R_ENflag){
-        configL += R_EN;
-    }
-    if(XTALKflag){
-        configL += XTALK;
-    }
-    if(AUTO_INCflag){
-        configL += AUTO_INC;
-    }
-    if(CONT_MODEflag){
-        configL += CONT_MODE;
-    }
-    if(CONVflag){
-        configL += CONV;
-    }
-    if(CONV_FINISHEDflag){
-        configL += CONV_FINISHED;
-    }
-    
-    return configL;
+    return CONFIG_Lbits.value;
 }
 
 uint8_t getConfigH(){
-    uint8_t configH = 0;
-    
-    configH += (INT_MODEflags & 0b00000011) << 6;
-    configH += (DURATIONval & 0b00111111);
-    
-    return configH;
+    return CONFIG_Hbits.value;
 }
 
 void updateConfig(){ //static variables for previous states
@@ -169,45 +117,44 @@ void updateConfig(){ //static variables for previous states
     }
 
     // L_EN flag
-    if(prev_L_ENflag != L_ENflag){
-        if(L_ENflag){
+    if(prevCONFIG_Lbits.L_EN != CONFIG_Lbits.L_EN){
+        if(CONFIG_Lbits.L_EN){
             powerOnLeftSensor();
         }else{
             powerOffLeftSensor();
         }    
-        prev_L_ENflag = L_ENflag;
     }
     
     //R_EN flag
-    if(prev_R_ENflag != R_ENflag){
-        if(R_ENflag){
+    if(prevCONFIG_Lbits.R_EN != CONFIG_Lbits.R_EN){
+        if(CONFIG_Lbits.R_EN){
             powerOnRightSensor();
         }else{
             powerOffRightSensor();
         }
-        prev_R_ENflag = R_ENflag;
     }
     
     //XTALK Flag
-    if(prev_XTALKflag != XTALKflag){
-        if(XTALKflag){
+    if(prevCONFIG_Lbits.XTALK != CONFIG_Lbits.XTALK){
+        if(CONFIG_Lbits.XTALK){
             enableXTalk();
         }else{
             disableXTalk();
         }    
-        prev_XTALKflag = XTALKflag;
     }
     
     //INT_MODE, CONV, CONT_MODE are managed automatically by the main code and
     // do not need to be "applied".
 
     //DURATION
-    if(prev_DURATIONval != DURATIONval){
-        uint32_t totDuration = 1000*(20+DURATIONval*3);
+    if(prevCONFIG_Hbits.DURATION != CONFIG_Hbits.DURATION){
+        uint32_t totDuration = 1000*(20+CONFIG_Hbits.DURATION*3);
         VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
         VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
-        prev_DURATIONval = DURATIONval;
     }
+    
+    prevCONFIG_Lbits = CONFIG_Lbits;
+    prevCONFIG_Hbits = CONFIG_Hbits;
     
     CONFIG_UPDATEDflag = false;
 }
@@ -236,4 +183,13 @@ void initVL53L0X(){
     LeftSensor = &__LeftSensor_;
     RightSensor->I2cDevAddr = 0x52;
     LeftSensor->I2cDevAddr = 0x52;
+}
+
+void measurementFinished(){
+    CONFIG_Lbits.CONV_FINISHED = 1;
+    
+    //If we are not in continuous mode we stop the measurement
+    if(!CONFIG_Lbits.CONT_MODE){ 
+        CONFIG_Lbits.CONV = 0;
+    }
 }

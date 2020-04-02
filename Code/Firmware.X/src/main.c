@@ -325,15 +325,15 @@ int16_t main(void)
             /*Main loop*/
             while(1){                
                 // Start a measurement
-                if(CONVflag){
+                if(CONFIG_Lbits.CONV){
                     //Right Sensor
-                    if(R_ENflag && !isRightRunning && !isRightReady && !isLeftRunning && !rightUpdated){
+                    if(CONFIG_Lbits.R_EN && !isRightRunning && !isRightReady && !isLeftRunning && !rightUpdated){
                         isRightRunning = true;
                         StatusR &= VL53L0X_StartMeasurement(RightSensor);
                     }
                     
                     //Left Sensor
-                    if(L_ENflag && !isLeftRunning && !isLeftReady && !isRightRunning && !leftUpdated){
+                    if(CONFIG_Lbits.L_EN && !isLeftRunning && !isLeftReady && !isRightRunning && !leftUpdated){
                         isLeftRunning = true;
                         StatusL &= VL53L0X_StartMeasurement(LeftSensor);
                     }
@@ -367,20 +367,18 @@ int16_t main(void)
                     isLeftReady = false;
                 }
                 
-                //Updates interrupt state, CONV and CONF_FINISHED flags
-                bool rightCond = rightUpdated || !R_ENflag;
-                bool leftCond = leftUpdated || !L_ENflag;
+                //Updates interrupt state, CONV and CONFIG_FINISHED flags
+                bool rightCond = rightUpdated || !CONFIG_Lbits.R_EN;
+                bool leftCond = leftUpdated || !CONFIG_Lbits.L_EN;
                 if(rightCond && leftCond){
                     //Raise interrupt if they are not disabled.
-                    if(INT_MODEflags != INT_OFF){
+                    if(CONFIG_Hbits.INT_MODE != INT_OFF){
                         raiseInt();
                     }
                     
-                    //full measurement performed, raise flag
-                    CONV_FINISHEDflag = true;
-                    if(!CONT_MODEflag){ //TODO update flags only if measurement was correct ?
-                        CONVflag = 0;
-                    }
+                    //full measurement performed
+                    //TODO update flags only if measurement was correct ?
+                    measurementFinished();
                     
                     //Reset status 
                     rightUpdated = false;
@@ -388,7 +386,7 @@ int16_t main(void)
                 }else if(rightUpdated || leftUpdated){
                     //Raise interrupt if we have a new measurement and int is
                     //configured so
-                    if(INT_MODEflags == INT_L_OR_R){
+                    if(CONFIG_Hbits.INT_MODE == INT_L_OR_R){
                         raiseInt();
                     }
                 }
