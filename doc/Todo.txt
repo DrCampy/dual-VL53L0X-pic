@@ -1,8 +1,1 @@
-Block diagram
-pinout
-power
-I2C
-Registers
-PCB with annotations
-DIP Switch + calibration
-Error codes
+References to API
