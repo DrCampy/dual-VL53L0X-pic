@@ -486,6 +486,11 @@ void loadCalData(){
         checkError(5);
     }
     
+    //Perform temperature reference calibration.
+    StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
+                &phaseCal);
+    StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
+                &phaseCal);
     checkError(6);
     
     //Offset Calibration data
@@ -513,10 +518,4 @@ void loadCalData(){
                     xTalkCompensationRateMegaCpsL);
         checkError(8);
     }
-    
-    //Perform temperature reference calibration.
-    StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
-                &phaseCal);
-    StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
-                &phaseCal);
 }
