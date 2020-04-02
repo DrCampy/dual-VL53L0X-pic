@@ -155,7 +155,7 @@ int16_t main(void)
                         &refSPADCountR, &isApertureSPADR);
             StatusL = VL53L0X_PerformRefSpadManagement(LeftSensor,
                         &refSPADCountL, &isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Stores data to memory */
             writeRightSPADCalData(&refSPADCountR, &isApertureSPADR);
@@ -174,14 +174,14 @@ int16_t main(void)
                         isApertureSPADR);
             StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                         isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Performs Temperature ref calibration */
             StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
                         &phaseCal);
             StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
                         &phaseCal);
-            checkError(5);
+            checkError(6);
             
             /* Lights LED to tell the user the calibration will begin */
             blinkStatusLed(3, 500, 500); /* 3 blinks of 0.5s, 0.5s apart */
@@ -194,7 +194,7 @@ int16_t main(void)
                         OFFSET_CAL_DISTANCE, &offsetMicroMeterR);
             StatusL = VL53L0X_PerformOffsetCalibration(LeftSensor,
                         OFFSET_CAL_DISTANCE, &offsetMicroMeterL);
-            checkError(6);
+            checkError(7);
 
             /* Store data to memory */
             writeRightOffsetCalData(&offsetMicroMeterR);
@@ -213,14 +213,14 @@ int16_t main(void)
                         isApertureSPADR);
             StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                         isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Performs Temperature ref calibration */
             StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
                         &phaseCal);
             StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
                         &phaseCal);
-            checkError(5);
+            checkError(6);
             /* Loads offset cal data */
             readRightOffsetCalData(&offsetMicroMeterR);
             readLeftOffsetCalData(&offsetMicroMeterL);
@@ -228,7 +228,7 @@ int16_t main(void)
                         offsetMicroMeterR);
             StatusL = VL53L0X_SetOffsetCalibrationDataMicroMeter(LeftSensor,
                         offsetMicroMeterL);
-            checkError(6);
+            checkError(7);
             /* Lights LED to tell the user the calibration will begin */
             blinkStatusLed(4, 500, 500); /* 4 blinks of 0.5s, 0.5s apart */
             
@@ -240,7 +240,7 @@ int16_t main(void)
                         XTALK_CAL_DISTANCE, &xTalkCompensationRateMegaCpsR);
             StatusL = VL53L0X_PerformXTalkCalibration(LeftSensor,
                         XTALK_CAL_DISTANCE, &xTalkCompensationRateMegaCpsL);
-            checkError(7);
+            checkError(8);
             
             writeRightXTalkCalData(&xTalkCompensationRateMegaCpsR);
             writeLeftXTalkCalData(&xTalkCompensationRateMegaCpsL);
@@ -261,19 +261,19 @@ int16_t main(void)
                         &isApertureSPADR);
             StatusL = VL53L0X_GetReferenceSpads(LeftSensor, &refSPADCountL,
                         &isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             StatusR = VL53L0X_GetOffsetCalibrationDataMicroMeter(RightSensor,
                         &offsetMicroMeterR);
             StatusL = VL53L0X_GetOffsetCalibrationDataMicroMeter(LeftSensor,
                         &offsetMicroMeterL);
-            checkError(5);
+            checkError(7);
             
             StatusR = VL53L0X_GetXTalkCompensationRateMegaCps(RightSensor,
                         &xTalkCompensationRateMegaCpsR);
             StatusL = VL53L0X_GetXTalkCompensationRateMegaCps(LeftSensor,
                         &xTalkCompensationRateMegaCpsL);
-            checkError(6);
+            checkError(8);
             
             /* Store all cal data to the pic memory */
             writeRightSPADCalData(&refSPADCountR, &isApertureSPADR);
@@ -321,6 +321,7 @@ int16_t main(void)
             IEC1bits.INT2IE = 1;
             IFS3bits.INT3IF = 0;
             IEC3bits.INT3IE = 1;
+            checkError(2);
             
             /*Main loop*/
             while(1){                
@@ -403,11 +404,10 @@ int16_t main(void)
                 updateConfig();
                 
                 //If an error happened during the main loop, stop and blink LED.
-                checkError(4);
+                checkError(1);
             }
-        default:
+        default:;
             /*Unknown mode*/
-            blinkStatusLed(8, 200, 300);
     }
     return 0; /*Even if we will never return...*/
 }
@@ -483,8 +483,10 @@ void loadCalData(){
                     isApertureSPADR);
         StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                     isApertureSPADL);
-        checkError(4);
+        checkError(5);
     }
+    
+    checkError(6);
     
     //Offset Calibration data
     readRightOffsetCalData(&offsetMicroMeterR);
@@ -496,7 +498,7 @@ void loadCalData(){
                     offsetMicroMeterR);
         StatusL = VL53L0X_SetOffsetCalibrationDataMicroMeter(LeftSensor,
                     offsetMicroMeterL);
-        checkError(5);
+        checkError(7);
     }
     
     //Crosstalk calibration data
@@ -509,7 +511,7 @@ void loadCalData(){
                     xTalkCompensationRateMegaCpsR);
         StatusL = VL53L0X_SetXTalkCompensationRateMegaCps(LeftSensor,
                     xTalkCompensationRateMegaCpsL);
-        checkError(6);
+        checkError(8);
     }
     
     //Perform temperature reference calibration.
