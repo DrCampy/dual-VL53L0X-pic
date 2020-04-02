@@ -118,7 +118,7 @@ void I2CSlaveExec(){
                  * If not we will be receiving the address of the next register
                  * to work with.
                  */
-                if(AUTO_INCflag == true){
+                if(CONFIG_Lbits.AUTO_INC == true){
                     workingRegister = I2CSlaveNextRegister(workingRegister);
                 }else{
                     state = WAITING_REGISTER;
@@ -221,7 +221,7 @@ uint8_t I2CSlaveNextRegister(uint8_t reg){
     
     // If the register is a config register we loop accross them
     if(I2CSlaveIsConfigRegister(reg)){
-        if(AUTO_INCflag == false){
+        if(CONFIG_Lbits.AUTO_INC == false){
             return reg;
         }else{
             reg++;
@@ -232,7 +232,7 @@ uint8_t I2CSlaveNextRegister(uint8_t reg){
     }
     //If the register is a distance register we loop accross them
     else{
-        if(AUTO_INCflag == false){
+        if(CONFIG_Lbits.AUTO_INC == false){
             return reg;
         }else{
             reg++;
@@ -330,7 +330,7 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
 void I2CSlaveDistReadTrigger(){
     //Resets the interrupt signal in case it was raised.
     resetInt();
-    CONV_FINISHEDflag = false;
+    CONFIG_Lbits.CONV_FINISHED = false;
 }
 
 /* Interrupt for I2C2 (slave)*/
