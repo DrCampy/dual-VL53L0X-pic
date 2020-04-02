@@ -1,0 +1,25 @@
+In RUN mode if the LED is not forced off (see section \ref{sec:BootModes}) the sensor might indicate an error code by blinking the status LED a few times. This should normally not happen during normal operation and is mainly used for debug purposes.
+\newline
+\noindent
+\begin{tabularx}{\textwidth}{|c|X|}
+ \hline
+ \thead{Number of blinks} & \thead{Reason}                                                                        \\
+ \hline
+ 1                        & Sensor related error during the main execution loop.                                  \\
+ \hline
+ 2                        & Sensor related error while configuring the sensor. (RUN mode only)                    \\
+ \hline
+ 3                        & Could not perform device initialization.                                              \\
+ \hline
+ 4                        & Could not load device specific settings.                                              \\
+ \hline
+ 5                        & \makecell[lc]{In SPAD calibration mode: could not perform SPAD calibration.           \\In reset mod: could not get SPAD calibration data.\\Otherwise: could load SPAD calibration data.}\\
+ \hline
+ 6                        & Could not perform reference calibration.                                              \\
+ \hline
+ 7                        & \makecell[lc]{In offset calibration mode: could not perform offset calibration.       \\In reset mod: could not get offset calibration data.\\Otherwise: could not load offset calibration data.} \\
+ \hline
+ 8                        & \makecell[lc]{In crosstalk calibration mode: could not perform crosstalk calibration. \\In reset mod: could not get crosstalk calibration data.\\Otherwise: could not load crosstalk calibration data.} \\
+ \hline
+\end{tabularx}
+
