@@ -30,8 +30,8 @@ The third switch control the \iic address.
 \end{tabularx}
 \textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.
 
-\subsection{Calibration routines} %TODO reference to API manual (chap 2)
-When booting in calibration mode the status LED will blink a few times (0.5s ON, 0.5s OFF) indicating the calibration routine performed. The LED will then be kept lit until the calibration is over. The LED will then be kept lit off and the sensor can then be safely powered off.
+\subsection{Calibration routines}
+When booting in calibration mode the status LED will blink a few times (0.5s ON, 0.5s OFF) indicating the calibration routine performed. The LED will then be kept lit until the calibration is over. The LED will then be kept lit off and the sensor can then be safely powered off. For detailed informations on the calibration requirements check the chapter 2 of the VL53L0X API User Manual \cite{tofAPI}.
 
 \subsubsection{SPAD Calibration}
 Status LED blinks 2 times. Optimize the dynamics of the system. It lasts for approximately 10ms. Nothing special is required to perform this calibration. It must be performed with the protective glass cover if you use one.

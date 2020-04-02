@@ -6,6 +6,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{courier}
+\usepackage{datetime}
 \usepackage{fancyhdr}
 \usepackage{float}
 \usepackage{graphicx}
@@ -25,12 +26,16 @@
 \renewcommand\theadfont{\bfseries}
 \renewcommand\theadgape{\Gape[4pt]}
 
+\newdateformat{monthyeardate}{%
+  \monthname[\THEMONTH], \THEYEAR}
+
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{Hawkseye - Datasheet}
 \lfoot{Frustrating Box}
 \cfoot{\thepage / \pageref{LastPage}}
-\rfoot{\today}
+\rfoot{\monthyeardate\today}
+
 
 \begin{document}
 
@@ -66,6 +71,9 @@
 
 \section{Electric Diagram}
 \includepdf[pages=-, landscape]{../documents/schematicV1.pdf}
-\input
+
+\nocite{*}
+\bibliographystyle{IEEEtran}
+\bibliography{main}
 
 \end{document}
