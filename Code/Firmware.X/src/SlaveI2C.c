@@ -336,5 +336,29 @@ void I2CSlaveDistReadTrigger(){
 /* Interrupt for I2C2 (slave)*/
 void __attribute__((interrupt,no_auto_psv)) _SI2C2Interrupt(void){
     IFS3bits.SI2C2IF = 0; //lower interrupt flag
-    i2c_slave_ready = true;
+    
+    if(!I2C2STATbits.R_NOT_W){
+        i2c_slave_ready = true;
+    }else{ //If we only have to respond with data, do it asap
+        if(!I2C2STATbits.D_NOT_A){//Received our address
+            //we are transmitting (ADD<0> = 1)
+            //We have to send requested data.
+            char c = I2CSlaveGetByte();
+            state = SENDING_DATA; //update internal state
+            I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
+            workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
+        }else{//Received / transmitted data
+            //Transmitting (ADD<0> = 1)
+            //First byte was sent immediately after we have been addressed.
+
+            //If we received NACK that means we have finished the transmission.
+            if(I2C2STATbits.ACKSTAT == 0){
+                //We only have to continue the transmission.
+                I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister));
+
+                //Selects next register
+                workingRegister = I2CSlaveNextRegister(workingRegister); 
+            }
+        }
+    }
 }
