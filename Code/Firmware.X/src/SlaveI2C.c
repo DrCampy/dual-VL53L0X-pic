@@ -80,12 +80,12 @@ void I2CSlaveExec(){
             state = WAITING_REGISTER; //update internal state
 
             //Clears the ReadBuffer Full flag
-            char c = I2CSlaveGetByte();
+            char __attribute__((unused)) c = I2CSlaveGetByte();
             I2CSlaveAck();
         }else{
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
-            char c = I2CSlaveGetByte();
+            char __attribute__((unused)) c = I2CSlaveGetByte() ;
             state = SENDING_DATA; //update internal state
             I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
             workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
@@ -342,7 +342,7 @@ void __attribute__((interrupt,no_auto_psv)) _SI2C2Interrupt(void){
         if(!I2C2STATbits.D_NOT_A){//Received our address
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
-            char c = I2CSlaveGetByte();
+            char __attribute__((unused)) c = I2CSlaveGetByte();
             state = SENDING_DATA; //update internal state
             I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
             workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
