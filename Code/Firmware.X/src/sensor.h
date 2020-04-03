@@ -2,7 +2,7 @@
  * File:   sensor.h
  * Author: Morgan Diepart
  *
- * Created on 15 février 2020, 01:21
+ * Created on 15 fï¿½vrier 2020, 01:21
  */
 
 #ifndef SENSOR_H
@@ -37,14 +37,14 @@ extern "C" {
         union {
             uint8_t value;
             struct {
-                uint8_t L_EN:1;
-                uint8_t R_EN:1;
-                uint8_t XTALK:1;
-                uint8_t AUTO_INC:1;
-                uint8_t CONT_MODE:1;
-                uint8_t CONV:1;
-                uint8_t CONV_FINISHED:1;
                 uint8_t :1;
+                uint8_t CONV_FINISHED:1;
+                uint8_t CONV:1;
+                uint8_t CONT_MODE:1;
+                uint8_t AUTO_INC:1;
+                uint8_t XTALK:1;
+                uint8_t R_EN:1;
+                uint8_t L_EN:1;
             };
         };
     } CONFIG_LBITS;   
@@ -55,8 +55,8 @@ extern "C" {
         union {
             uint8_t value;
             struct {
-                uint8_t INT_MODE:2;
                 uint8_t DURATION:6;
+                uint8_t INT_MODE:2;
             };
         };
     } CONFIG_HBITS;   
