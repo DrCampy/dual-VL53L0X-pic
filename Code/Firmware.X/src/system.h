@@ -2,8 +2,6 @@
 /* System Level #define Macros                                                */
 /******************************************************************************/
 
-/* TODO Define system operating frequency */
-
 /* Microcontroller MIPs (FCY) */
 #define SYS_FREQ        32000000L
 #define FCY             SYS_FREQ/2
@@ -18,3 +16,4 @@ go here. */
 
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 
+void configureInterrupts(void);

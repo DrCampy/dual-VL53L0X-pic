@@ -14,6 +14,7 @@
 #include "sensor.h"
 #include "SlaveI2C.h"
 
+
 /*
  * Uncomment to enable debug mode.
  * 
@@ -22,6 +23,13 @@
  */
 #define DEBUG
 
+//#define USE_I2C_1V8 //Uncomment to use 1.8V I2C
+
+#ifndef USE_I2C_2V8 //Must be defined at compilation level.
+#ifndef USE_I2C_1V8
+#error "Voltage not defined !"
+#endif
+#endif
 /******************************************************************************/
 /* Custom Functions, enums,...                                                */
 /******************************************************************************/
@@ -39,8 +47,10 @@ void loadCalData();
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 volatile bool i2c_slave_ready = false;
-volatile bool isLeftReady = false, isRightReady = false;   
+volatile bool isLeftReady = false, isRightReady = false;
+volatile bool isRightRunning = false, isLeftRunning = false;
 bool i2cSecondaryAddress = false;
+
 
 extern VL53L0X_DEV RightSensor, LeftSensor; /*Sensors handles*/
 
@@ -53,39 +63,32 @@ VL53L0X_Error StatusL = VL53L0X_ERROR_NONE,
 
 int16_t main(void)
 {
-    
-    /* Configure the oscillator for the device */
-    ConfigureOscillator();
-    
-    /* Initialize EEprom Emulator */
-    DataEEInit();
-    
-    bool DIPS[3];
-    DIPS[0] = PORTBbits.DIP1pin; /* Calibration Mode */
-    DIPS[1] = PORTBbits.DIP2pin; /* LED Mode or Calibration Data Management */
-    DIPS[2] = PORTBbits.DIP3pin; /* Slave I2C address */
+    /* Configure the oscillator */
+    ConfigureOscillator();          
 
+    /* Declarations */
+    bool DIPS[3];
+    bool ledMode;
     uint8_t slaveI2CAddress;
     Mode currentMode = RUN;
     
-    /* Sensors Interrupts config register
-     * RB13 = INT_R = RP13 = INT2
-     * RB14 = INT_L = RP14 = INT3
-     */
-    RPINR1 = 0xDE;
-
-    /* 
-     * Uses General call address so devices are always reconfigured
-     * independently of their previous configuration
-     * If their address was changed by a previous config it may
-     * otherwise cause problems.
-     */
-    LeftSensor->I2cDevAddr = 0x00; 
-    RightSensor->I2cDevAddr = 0x00;
+    /* Initializations */
+    RCON = 0x2000;
+    DataEEInit();                   /* Initialize EEprom Emulator */
+    initVL53L0X();                  /* Initialize sensors sructures */
+    configureInterrupts();
+    DIPS[0] = PORTBbits.DIP1pin;    /* Calibration Mode */
+    DIPS[1] = PORTBbits.DIP2pin;    /* LED Mode or Cal Data Management */
+    DIPS[2] = PORTBbits.DIP3pin;    /* Slave I2C address */  
+    ANSBbits.ANSB15 = 0;            /* Configure XSHUT_L as digital */
+    ODCBbits.ODCB15 = 1;            /* Configure XSHUT_L as open-drain */
+    TRISBbits.TRISB15 = 0;          /* Configure XSHUT_L as output */
+    ANSBbits.ANSB12 = 0;            /* Configure XSHUT_R as digital */
+    ODCBbits.ODCB12 = 1;            /* Configure XSHUT_R as open-drain */
+    TRISBbits.TRISB12 = 0;          /* Configure XSHUT_R as output */
+    TRISBbits.TRISB4 = 0;           /* Configures LED pin as output */
     
-    bool ledMode;
-
-    
+    /* Detect in which mode we are */
     if(DIPS[0] == false){ /*We are in run mode*/
         currentMode = RUN;
         ledMode = DIPS[1];
@@ -105,7 +108,7 @@ int16_t main(void)
         }else{
             currentMode = OFFSET_CAL;
         }
-    }else{
+    }else{ /* DIPS[1] == true*/
         if(DIPS[2] == false){
             currentMode = XTALK_CAL;
         }else{
@@ -113,26 +116,13 @@ int16_t main(void)
         }
     }
 
-    /* Configures LED pin. Led pin is RB4 */
-    TRISBbits.TRISB4 = 0;
-    
-    /* Configure shutdown pins as outputs */
-    TRISB &= !((1 << XSHUT_L) + (1 << XSHUT_R));
-    
     /* Configure right sensor address */
-    powerOnRightSensor(); /* Wake up right sensor */
+    LATBbits.LATB15 = 0; /* Put left sensor to sleep */
+    LATBbits.LATB12 = 1; /* Wake up right sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(RightSensor, 0x54);
-    RightSensor->I2cDevAddr = 0x54;
-    powerOffRightSensor();
-
-    /* Configure left sensor address */
-    powerOnLeftSensor(); /* Wake up left sensor */
+    LATBbits.LATB15 = 1; /* Wakes up left sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
-    VL53L0X_SetDeviceAddress(LeftSensor, 0x52);
-    LeftSensor->I2cDevAddr = 0x52;
-    
-    powerOnRightSensor();
     
     StatusR = VL53L0X_DataInit(RightSensor);
     StatusL = VL53L0X_DataInit(LeftSensor);
@@ -155,7 +145,7 @@ int16_t main(void)
     switch(currentMode){
         case SPAD_CAL: ;
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(2, 1000, 500); /* 2 blinks of 1s, 0.5s apart */
+            blinkStatusLed(2, 500, 500); /* 2 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while calibration performed */
             ledOn();
@@ -165,7 +155,7 @@ int16_t main(void)
                         &refSPADCountR, &isApertureSPADR);
             StatusL = VL53L0X_PerformRefSpadManagement(LeftSensor,
                         &refSPADCountL, &isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Stores data to memory */
             writeRightSPADCalData(&refSPADCountR, &isApertureSPADR);
@@ -184,17 +174,17 @@ int16_t main(void)
                         isApertureSPADR);
             StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                         isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Performs Temperature ref calibration */
             StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
                         &phaseCal);
             StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
                         &phaseCal);
-            checkError(5);
+            checkError(6);
             
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(3, 1000, 500); /* 3 blinks of 1s, 0.5s apart */
+            blinkStatusLed(3, 500, 500); /* 3 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while calibration performed */
             ledOn();
@@ -204,7 +194,7 @@ int16_t main(void)
                         OFFSET_CAL_DISTANCE, &offsetMicroMeterR);
             StatusL = VL53L0X_PerformOffsetCalibration(LeftSensor,
                         OFFSET_CAL_DISTANCE, &offsetMicroMeterL);
-            checkError(6);
+            checkError(7);
 
             /* Store data to memory */
             writeRightOffsetCalData(&offsetMicroMeterR);
@@ -223,14 +213,14 @@ int16_t main(void)
                         isApertureSPADR);
             StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                         isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             /* Performs Temperature ref calibration */
             StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
                         &phaseCal);
             StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
                         &phaseCal);
-            checkError(5);
+            checkError(6);
             /* Loads offset cal data */
             readRightOffsetCalData(&offsetMicroMeterR);
             readLeftOffsetCalData(&offsetMicroMeterL);
@@ -238,9 +228,9 @@ int16_t main(void)
                         offsetMicroMeterR);
             StatusL = VL53L0X_SetOffsetCalibrationDataMicroMeter(LeftSensor,
                         offsetMicroMeterL);
-            checkError(6);
+            checkError(7);
             /* Lights LED to tell the user the calibration will begin */
-            blinkStatusLed(4, 1000, 500); /* 4 blinks of 1s, 0.5s apart */
+            blinkStatusLed(4, 500, 500); /* 4 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while measurement performed */
             LATBbits.LATB4 = 1;
@@ -250,7 +240,7 @@ int16_t main(void)
                         XTALK_CAL_DISTANCE, &xTalkCompensationRateMegaCpsR);
             StatusL = VL53L0X_PerformXTalkCalibration(LeftSensor,
                         XTALK_CAL_DISTANCE, &xTalkCompensationRateMegaCpsL);
-            checkError(7);
+            checkError(8);
             
             writeRightXTalkCalData(&xTalkCompensationRateMegaCpsR);
             writeLeftXTalkCalData(&xTalkCompensationRateMegaCpsL);
@@ -261,7 +251,7 @@ int16_t main(void)
             break;
         case RST: ;            
             /* Lights LED to tell the user the reset will begin */
-            blinkStatusLed(5, 1000, 500); /* 5 blinks of 1s, 0.5s apart */
+            blinkStatusLed(5, 500, 500); /* 5 blinks of 0.5s, 0.5s apart */
             
             /* Keep Status LED on while reset performed */
             ledOn();
@@ -271,19 +261,19 @@ int16_t main(void)
                         &isApertureSPADR);
             StatusL = VL53L0X_GetReferenceSpads(LeftSensor, &refSPADCountL,
                         &isApertureSPADL);
-            checkError(4);
+            checkError(5);
             
             StatusR = VL53L0X_GetOffsetCalibrationDataMicroMeter(RightSensor,
                         &offsetMicroMeterR);
             StatusL = VL53L0X_GetOffsetCalibrationDataMicroMeter(LeftSensor,
                         &offsetMicroMeterL);
-            checkError(5);
+            checkError(7);
             
             StatusR = VL53L0X_GetXTalkCompensationRateMegaCps(RightSensor,
                         &xTalkCompensationRateMegaCpsR);
             StatusL = VL53L0X_GetXTalkCompensationRateMegaCps(LeftSensor,
                         &xTalkCompensationRateMegaCpsL);
-            checkError(6);
+            checkError(8);
             
             /* Store all cal data to the pic memory */
             writeRightSPADCalData(&refSPADCountR, &isApertureSPADR);
@@ -300,110 +290,118 @@ int16_t main(void)
             
         case RUN: ;
             VL53L0X_RangingMeasurementData_t RightMeasurement, LeftMeasurement;
-            bool isRightRunning = 0;
-            bool isLeftRunning = 0;
-            bool leftUpdated = 0, rightUpdated = 0;
+            bool leftUpdated = false, rightUpdated = false;
             
             /* Load calibration data + perform reference calibration */
             loadCalData();    
 
             /* Configures devices */
-            StatusR = VL53L0X_SetDeviceMode(RightSensor,
+            StatusR &= VL53L0X_SetDeviceMode(RightSensor,
                         VL53L0X_DEVICEMODE_SINGLE_RANGING);
-            StatusL = VL53L0X_SetDeviceMode(LeftSensor,
+            StatusL &= VL53L0X_SetDeviceMode(LeftSensor,
                         VL53L0X_DEVICEMODE_SINGLE_RANGING);
-            StatusR = VL53L0X_SetGpioConfig(RightSensor, 0,
+            StatusR &= VL53L0X_SetGpioConfig(RightSensor, 0,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
-                    VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_HIGH,
-                    VL53L0X_INTERRUPTPOLARITY_HIGH);
-            StatusL = VL53L0X_SetGpioConfig(LeftSensor, 0,
+                    VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY,
+                    VL53L0X_INTERRUPTPOLARITY_LOW);
+            StatusL &= VL53L0X_SetGpioConfig(LeftSensor, 0,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
-                    VL53L0X_GPIOFUNCTIONALITY_THRESHOLD_CROSSED_HIGH,
-                    VL53L0X_INTERRUPTPOLARITY_HIGH);
-            StatusR = VL53L0X_SetInterruptThresholds(RightSensor,
+                    VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY,
+                    VL53L0X_INTERRUPTPOLARITY_LOW);
+            StatusR &= VL53L0X_SetInterruptThresholds(RightSensor,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
                     (FixPoint1616_t)0.0, (FixPoint1616_t)50);
-            StatusL = VL53L0X_SetInterruptThresholds(LeftSensor,
+            StatusL &= VL53L0X_SetInterruptThresholds(LeftSensor,
                     VL53L0X_DEVICEMODE_SINGLE_RANGING,
                     (FixPoint1616_t)0.0, (FixPoint1616_t)50);
             I2CSlaveInit(slaveI2CAddress);
             
             //Enable interrupts for slave I2C and both sensors
-            IEC3bits.SI2C2IE = 1;
+            IFS1bits.INT2IF = 0;
             IEC1bits.INT2IE = 1;
+            IFS3bits.INT3IF = 0;
             IEC3bits.INT3IE = 1;
-            
-            //Configure interrupt pin
-            TRISBbits.TRISB11 = 0; //Configures as output
-            resetInt(); //Reset int before main code execution
+            checkError(2);
             
             /*Main loop*/
             while(1){                
                 // Start a measurement
-                if(CONVflag){
+                if(CONFIG_Lbits.CONV){
                     //Right Sensor
-                    if(R_ENflag && !isRightRunning && !isLeftRunning){
-                        StatusR = VL53L0X_StartMeasurement(RightSensor);
+                    if(CONFIG_Lbits.R_EN && !isRightRunning && !isRightReady && !isLeftRunning && !rightUpdated){
                         isRightRunning = true;
+                        StatusR &= VL53L0X_StartMeasurement(RightSensor);
                     }
                     
                     //Left Sensor
-                    if(L_ENflag && !isLeftRunning && !isRightRunning){
-                        StatusL = VL53L0X_StartMeasurement(LeftSensor);
+                    if(CONFIG_Lbits.L_EN && !isLeftRunning && !isLeftReady && !isRightRunning && !leftUpdated){
                         isLeftRunning = true;
+                        StatusL &= VL53L0X_StartMeasurement(LeftSensor);
                     }
                 }
                 
                 // Recovers measurements (right)
                 if(isRightReady){
-                    isRightRunning = false;
                     //Get measurement data from right sensor
-                    VL53L0X_GetRangingMeasurementData(RightSensor,
+                    StatusR &= VL53L0X_GetRangingMeasurementData(RightSensor,
                                 &RightMeasurement);
-                    VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
+                    StatusR &= VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
-                        rightDist = (uint8_t)RightMeasurement.RangeMilliMeter/1000;
+                        rightDist = RightMeasurement.RangeMilliMeter/10;
+                        updateSpecialMeasurements();
+                        rightUpdated = true;    
+                    }else if(RightMeasurement.RangeStatus == 4){
+                        //Out of range
+                        rightDist = 255;
+                        updateSpecialMeasurements();
+                        rightUpdated = true;
                     }
-                    updateSpecialMeasurements();
-                    rightUpdated = true;
+
                     isRightReady = false;
                 }
                 
                 // Recovers measurements (left)
                 if(isLeftReady){
                     //Get measurement data from left sensor
-                    StatusL = VL53L0X_GetRangingMeasurementData(LeftSensor,
+                    StatusL &= VL53L0X_GetRangingMeasurementData(LeftSensor,
                                 &LeftMeasurement);
-                    VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
+                    StatusL &= VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
+                    
+                    /* We only accept the measurement if it was successful or 
+                     * out of range*/
                     if(LeftMeasurement.RangeStatus == 0){
-                        leftDist = (uint8_t)LeftMeasurement.RangeMilliMeter/1000;
+                        //Valid measurement
+                        leftDist = LeftMeasurement.RangeMilliMeter/10;
+                        updateSpecialMeasurements();
+                        leftUpdated = true;
+                    }else if(LeftMeasurement.RangeStatus == 4){
+                        //Out of range
+                        leftDist = 255;
+                        updateSpecialMeasurements();
+                        leftUpdated = true;
                     }
-                    updateSpecialMeasurements();
-                    isLeftRunning = false;
-                    leftUpdated = true;
                     isLeftReady = false;
                 }
                 
-                //Updates interrupt state, CONV and CONF_FINISHED flags
-                bool rightCond = rightUpdated || !R_EN;
-                bool leftCond = leftUpdated || !L_EN;
+                //Updates interrupt state, CONV and CONFIG_FINISHED flags
+                bool rightCond = rightUpdated || !CONFIG_Lbits.R_EN;
+                bool leftCond = leftUpdated || !CONFIG_Lbits.L_EN;
                 if(rightCond && leftCond){
                     //Raise interrupt if they are not disabled.
-                    if(INT_MODEflags != INT_OFF){
+                    if(CONFIG_Hbits.INT_MODE != INT_OFF){
                         raiseInt();
                     }
                     
-                    //full measurement performed, raise flag
-                    CONV_FINISHEDflag = true;
-                    if(!CONT_MODEflag){ 
-                        CONVflag = 0;
-                    }
+                    //full measurement performed
+                    measurementFinished();
                     
                     //Reset status 
                     rightUpdated = false;
                     leftUpdated = false;
-                }else if(rightCond || leftCond){
-                    if(INT_MODEflags == INT_L_OR_R){
+                }else if(rightUpdated || leftUpdated){
+                    //Raise interrupt if we have a new measurement and INT is
+                    //configured so
+                    if(CONFIG_Hbits.INT_MODE == INT_L_OR_R){
                         raiseInt();
                     }
                 }
@@ -412,19 +410,18 @@ int16_t main(void)
                 
                 //Manages I2C
                 if(i2c_slave_ready == true){
-                    I2CSlaveExec();
                     i2c_slave_ready = false;
+                    I2CSlaveExec();
                 } 
                 
                 // Applies the config that may have been updated by I2C
                 updateConfig();
                 
                 //If an error happened during the main loop, stop and blink LED.
-                checkError(4);
+                checkError(1);
             }
-        default:
+        default:;
             /*Unknown mode*/
-            blinkStatusLed(8, 200, 300);
     }
     return 0; /*Even if we will never return...*/
 }
@@ -443,9 +440,11 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 void updateSpecialMeasurements(){
     // Update min and max
     if(rightDist < leftDist){
-        minDist = &rightDist;
+        minDist = rightDist;
+        maxDist = leftDist;
     }else{
-        maxDist = &leftDist;
+        minDist = leftDist;
+        maxDist = rightDist;
     }
     avgDist = (rightDist + leftDist)/2;
 }
@@ -498,8 +497,15 @@ void loadCalData(){
                     isApertureSPADR);
         StatusL = VL53L0X_SetReferenceSpads(LeftSensor, refSPADCountL,
                     isApertureSPADL);
-        checkError(4);
+        checkError(5);
     }
+    
+    //Perform temperature reference calibration.
+    StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
+                &phaseCal);
+    StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
+                &phaseCal);
+    checkError(6);
     
     //Offset Calibration data
     readRightOffsetCalData(&offsetMicroMeterR);
@@ -511,7 +517,7 @@ void loadCalData(){
                     offsetMicroMeterR);
         StatusL = VL53L0X_SetOffsetCalibrationDataMicroMeter(LeftSensor,
                     offsetMicroMeterL);
-        checkError(5);
+        checkError(7);
     }
     
     //Crosstalk calibration data
@@ -524,12 +530,6 @@ void loadCalData(){
                     xTalkCompensationRateMegaCpsR);
         StatusL = VL53L0X_SetXTalkCompensationRateMegaCps(LeftSensor,
                     xTalkCompensationRateMegaCpsL);
-        checkError(6);
+        checkError(8);
     }
-    
-    //Perform temperature reference calibration.
-    StatusR = VL53L0X_PerformRefCalibration(RightSensor, &vhvSettings,
-                &phaseCal);
-    StatusL = VL53L0X_PerformRefCalibration(LeftSensor, &vhvSettings,
-                &phaseCal);
 }

@@ -16,7 +16,9 @@
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition */
-#include <stdbool.h>       /* Includes true/false definition */
+#include <stdbool.h>
+#include "system.h"
+#include <libpic30.h>
 
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
@@ -155,25 +157,21 @@
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-extern volatile bool i2c_slave_ready;
 extern volatile bool isLeftReady, isRightReady;
+extern volatile bool isLeftRunning, isRightRunning;
 
-/* Interrupt for I2C2 (slave)*/
-void __attribute__((interrupt,auto_psv)) _SI2C2Interrupt(void){
-    i2c_slave_ready = true;
-    IFS3bits.SI2C2IF = 0; //lower interrupt flag
+/* Interrupt of right sensor (RB13) */
+void __attribute__((interrupt,no_auto_psv)) _INT2Interrupt(void){
+    isRightReady = true;
+    isRightRunning = false;
+    IFS1bits.INT2IF = 0; //Lower interrupt flag   
 }
 
-/* Interrupt of right sensor */
-void __attribute__((interrupt,auto_psv)) _INT2Interrupt(void){
-    isRightReady = 1;
-    IFS1bits.INT2IF = 0; //Lower interrupt flag
-    
-}
-
-/* Interrupt of left sensor */
-void __attribute__((interrupt,auto_psv)) _INT3Interrupt(void){
-    isLeftReady = 1;
+/* Interrupt of left sensor (RB 14) */
+void __attribute__((interrupt,no_auto_psv)) _INT3Interrupt(void){
+    isLeftReady = true;
+    isLeftRunning = false;
     IFS3bits.INT3IF = 0; //lower interrupt flag
 }
+
 

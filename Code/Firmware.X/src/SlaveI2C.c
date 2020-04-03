@@ -18,14 +18,15 @@ void    I2CSlaveSendByte            (uint8_t data);
 void    I2CSlaveAck                 ();
 void    I2CSlaveNack                ();
 int8_t  I2CSlaveIsLowRegister       (uint8_t reg);
-uint8_t I2CSlaveNextRegister        (bool reg);
+uint8_t I2CSlaveNextRegister        (uint8_t reg);
 bool    I2CSlaveIsRegisterValid     (uint8_t reg);
 uint8_t I2CSlaveGetRegister         (uint8_t address);
 void    I2CSlaveSetRegister         (uint8_t address, uint8_t data);
 void    I2CSlaveDistReadTrigger     ();
 
 
-extern bool i2cSecondaryAddress;
+extern bool i2cSecondaryAddress, i2c_slave_ready;
+uint8_t workingRegister = 0x00;
 //extern bool L_ENflag, R_ENflag, XTALKflag, AUTO_INCflag, CONT_MODEflag, 
 //        CONVflag, CONV_FINISHEDflag;
 
@@ -42,23 +43,33 @@ void I2CSlaveInit(uint8_t address){
     /* Sets address */
     I2CSlaveSetAddress(address);
     
-    /*Enables the I2C module to hols SCL low upon receiving a byte of either
-     address (if matching) or data until SCLREL is set to 1. Also allows slave
-     to automatically acknowledge it's address*/
-    I2C2CONHbits.AHEN = 1;
-    I2C2CONHbits.DHEN = 1;
+    /*Automatically aknowledes our address*/
+    I2C2CONHbits.AHEN = 0;
+    
+    /* Does NOT automatically acknowledges data bytes */
+    I2C2CONHbits.DHEN = 0;
+    I2C2CONLbits.STREN = 1;
+    I2C2CONLbits.STRICT = 1;
+    
+    /* Configure pins. SCL = RB3 ; SDA = RB2*/
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB3 = 0;
     
     /* Enables module */
     I2C2CONLbits.I2CEN = 1;
+    
+    /* Enables interrupts */
+    IFS3bits.SI2C2IF = 0;
+    IEC3bits.SI2C2IE = 1;
+
 }
 
 //If master sends NACK after we sent data, the module will not generate interrupt.
 //A stop condition is expected afterwards.
 
 void I2CSlaveExec(){
-    bool isAddress = !I2C2STATbits.D_NOT_A;
-    bool isRx = I2C2STATbits.R_NOT_W;
-    uint8_t workingRegister = 0x00;
+    bool isAddress = !I2C2STATbits.D_NOT_A; //It seems D_NOT_A cannot be trusted if used with debugger
+    bool isRx = !I2C2STATbits.R_NOT_W;
     
     //Check for collision or so
     
@@ -68,11 +79,13 @@ void I2CSlaveExec(){
             //Next interrupt will give us some registers address
             state = WAITING_REGISTER; //update internal state
 
-            //Acknowledge
+            //Clears the ReadBuffer Full flag
+            char __attribute__((unused)) c = I2CSlaveGetByte();
             I2CSlaveAck();
         }else{
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
+            char __attribute__((unused)) c = I2CSlaveGetByte() ;
             state = SENDING_DATA; //update internal state
             I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
             workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
@@ -104,7 +117,7 @@ void I2CSlaveExec(){
                  * If not we will be receiving the address of the next register
                  * to work with.
                  */
-                if(AUTO_INCflag == true){
+                if(CONFIG_Lbits.AUTO_INC == true){
                     workingRegister = I2CSlaveNextRegister(workingRegister);
                 }else{
                     state = WAITING_REGISTER;
@@ -114,27 +127,40 @@ void I2CSlaveExec(){
         }else{
             //Transmitting (ADD<0> = 1)
             //First byte was sent immediately after we have been addressed.
-            //We only have to continue the transmission.
-            I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister));
             
-            //Selects next register
-            workingRegister = I2CSlaveNextRegister(workingRegister); 
+            //If we received NACK that means we have finished the transmission.
+            if(I2C2STATbits.ACKSTAT == 0){
+                //We only have to continue the transmission.
+                I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister));
+            
+                //Selects next register
+                workingRegister = I2CSlaveNextRegister(workingRegister); 
+            }
+            
         }
     }    
 }
 
+/*
+ * Updates the I2C address of the sensor. 
+ * If the sensor is in secondary address mode the address used will not be used.
+ * Only the address of the normal address mode can be changed.
+ */
 void I2CSlaveSetAddress(uint8_t address){
-    //Write address to I2C module
-    I2C2ADD = address;
-    
-    //If we use the secondary i2c address mode we should not save it to
-    // flash memory
+
+    /*
+     * If we use the secondary i2c address mode we should not update the
+     * current address, only update the address in memory
+     */
     if(i2cSecondaryAddress == false){
-        //Write address to flash memory
-        writeI2CSlaveAddress(&address);
+        //Write address to I2C module
+        I2C2ADD = (address>>1);
+        //Update the internal value of the address.
+        I2C_ADDRESSvalue = address;
     }
-    
-    I2C_ADDRESSvalue = address;
+
+    //Write address to flash memory
+    writeI2CSlaveAddress(&address);
 }
 
 /*
@@ -167,6 +193,7 @@ uint8_t I2CSlaveGetByte(){
  */
 void I2CSlaveSendByte(uint8_t data){
     I2C2TRN = data;
+    I2C2CONLbits.SCLREL = 1;
 }
 
 /*
@@ -189,11 +216,11 @@ void I2CSlaveNack(){
  * Returns the next register starting from reg.
  * Accounts for Config/Non-config registers and auto incrementation.
  */
-uint8_t I2CSlaveNextRegister(bool reg){
+uint8_t I2CSlaveNextRegister(uint8_t reg){
     
     // If the register is a config register we loop accross them
     if(I2CSlaveIsConfigRegister(reg)){
-        if(AUTO_INCflag == false){
+        if(CONFIG_Lbits.AUTO_INC == false){
             return reg;
         }else{
             reg++;
@@ -204,7 +231,7 @@ uint8_t I2CSlaveNextRegister(bool reg){
     }
     //If the register is a distance register we loop accross them
     else{
-        if(AUTO_INCflag == false){
+        if(CONFIG_Lbits.AUTO_INC == false){
             return reg;
         }else{
             reg++;
@@ -277,11 +304,11 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
             break;
         case I2C_MIN:
             I2CSlaveDistReadTrigger();
-            return *minDist;
+            return minDist;
             break;
         case I2C_MAX:
             I2CSlaveDistReadTrigger();
-            return *maxDist;
+            return maxDist;
             break;
         case I2C_AVG:
             I2CSlaveDistReadTrigger();
@@ -302,5 +329,35 @@ uint8_t I2CSlaveGetRegister(uint8_t address){
 void I2CSlaveDistReadTrigger(){
     //Resets the interrupt signal in case it was raised.
     resetInt();
-    CONV_FINISHEDflag = false;
+    CONFIG_Lbits.CONV_FINISHED = false;
+}
+
+/* Interrupt for I2C2 (slave)*/
+void __attribute__((interrupt,no_auto_psv)) _SI2C2Interrupt(void){
+    IFS3bits.SI2C2IF = 0; //lower interrupt flag
+    
+    if(!I2C2STATbits.R_NOT_W){
+        i2c_slave_ready = true;
+    }else{ //If we only have to respond with data, do it asap
+        if(!I2C2STATbits.D_NOT_A){//Received our address
+            //we are transmitting (ADD<0> = 1)
+            //We have to send requested data.
+            char __attribute__((unused)) c = I2CSlaveGetByte();
+            state = SENDING_DATA; //update internal state
+            I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister)); //Transmits the requested value
+            workingRegister = I2CSlaveNextRegister(workingRegister); //Selects next register.
+        }else{//Received / transmitted data
+            //Transmitting (ADD<0> = 1)
+            //First byte was sent immediately after we have been addressed.
+
+            //If we received NACK that means we have finished the transmission.
+            if(I2C2STATbits.ACKSTAT == 0){
+                //We only have to continue the transmission.
+                I2CSlaveSendByte(I2CSlaveGetRegister(workingRegister));
+
+                //Selects next register
+                workingRegister = I2CSlaveNextRegister(workingRegister); 
+            }
+        }
+    }
 }
