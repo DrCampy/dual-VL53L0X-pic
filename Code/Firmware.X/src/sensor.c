@@ -16,7 +16,8 @@ CONFIG_LBITS prevCONFIG_Lbits = {{0b11000000}};
 
 /*Config high register*/
 CONFIG_HBITS CONFIG_Hbits = {{4}};
-CONFIG_HBITS prevCONFIG_Hbits = {{4}};
+CONFIG_HBITS prevCONFIG_Hbits = {{0}}; //We set duration to another value to apply
+                                       // the value we set (we set 32ms, default is 30)
 
 uint8_t I2C_ADDRESSvalue    = 0x42;
 
@@ -24,8 +25,8 @@ uint8_t I2C_ADDRESSvalue    = 0x42;
 uint8_t leftDist    = 0;
 uint8_t rightDist   = 0;
 uint8_t avgDist     = 0;
-uint8_t minDist;
-uint8_t maxDist;
+uint8_t minDist     = 0;
+uint8_t maxDist     = 0;
 
 /*
  * Apply the new config to the device.
