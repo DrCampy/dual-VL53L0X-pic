@@ -18,6 +18,7 @@
 \usepackage{soul}
 \usepackage{tabularx}
 \usepackage[normalem]{ ulem }
+\usepackage{vhistory}
 \usepackage{xcolor}
 \usepackage{tikz}
 
@@ -33,7 +34,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{Hawkseye - Datasheet}
+\lhead{Hawkseye - Datasheet Rev. A}
 \lfoot{Frustrating Box}
 \cfoot{\thepage / \pageref{LastPage}}
 \rfoot{\monthyeardate\today}
@@ -72,7 +73,11 @@
 \input{bill-of-material.tex}
 
 \section{Electric Diagram}
-\includepdf[pages=-, landscape]{../documents/schematicV1.pdf}
+\includepdf[pages=-, landscape]{../documents/schematicV1.1.pdf}
+
+\begin{versionhistory}
+	\vhEntry{Rev. A}{03 April 2020}{Morgan Diepart}{Updated to PCB V1.1}
+\end{versionhistory}
 
 \nocite{*}
 \bibliographystyle{IEEEtran}
