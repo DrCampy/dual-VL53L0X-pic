@@ -171,10 +171,10 @@ void updateDuration(VL53L0X_DEV sensor, uint32_t duration){
     
         VL53L0X_SetLimitCheckValue(sensor,
                 VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE,
-                (FixPoint1616_t)(0.25*65536));
+                (FixPoint1616_t)(0.1*65536));
         VL53L0X_SetLimitCheckValue(sensor, 
                 VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE,
-                (FixPoint1616_t)(32*65536));
+                (FixPoint1616_t)(60*65536));
         VL53L0X_SetMeasurementTimingBudgetMicroSeconds(sensor,duration);
         VL53L0X_SetVcselPulsePeriod(sensor,
                 VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
