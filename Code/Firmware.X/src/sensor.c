@@ -163,7 +163,6 @@ void updateConfig(){ //static variables for previous states
  * Raises the interrupt signal
  */
 void raiseInt(){
-    //RB11
     LATBbits.LATB11 = 1;
 }
 
