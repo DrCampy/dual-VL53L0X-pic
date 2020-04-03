@@ -28,7 +28,7 @@ The third switch control the \iic address.
  ON               & ON               & ON               & CAL mode. Resets the calibration parameters to the default parameters factory programmed in the VL53L0X chips. \\
  \hline
 \end{tabularx}
-\textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.
+\textit{\textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.}
 
 \subsection{Calibration routines}
 When booting in calibration mode the status LED will blink a few times (0.5s ON, 0.5s OFF) indicating the calibration routine performed. The LED will then be kept lit until the calibration is over. The LED will then be kept lit off and the sensor can then be safely powered off. For detailed informations on the calibration requirements check the chapter 2 of the VL53L0X API User Manual \cite{tofAPI}.
