@@ -348,9 +348,15 @@ int16_t main(void)
                     StatusR &= VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
                         rightDist = RightMeasurement.RangeMilliMeter/10;
+                        updateSpecialMeasurements();
+                        rightUpdated = true;    
+                    }else if(RightMeasurement.RangeStatus == 4){
+                        //Out of range
+                        rightDist = 255;
+                        updateSpecialMeasurements();
+                        rightUpdated = true;
                     }
-                    updateSpecialMeasurements();
-                    rightUpdated = true;
+
                     isRightReady = false;
                 }
                 
@@ -360,11 +366,20 @@ int16_t main(void)
                     StatusL &= VL53L0X_GetRangingMeasurementData(LeftSensor,
                                 &LeftMeasurement);
                     StatusL &= VL53L0X_ClearInterruptMask(LeftSensor, 0 /*unused*/);
+                    
+                    /* We only accept the measurement if it was successful or 
+                     * out of range*/
                     if(LeftMeasurement.RangeStatus == 0){
+                        //Valid measurement
                         leftDist = LeftMeasurement.RangeMilliMeter/10;
+                        updateSpecialMeasurements();
+                        leftUpdated = true;
+                    }else if(LeftMeasurement.RangeStatus == 4){
+                        //Out of range
+                        leftDist = 255;
+                        updateSpecialMeasurements();
+                        leftUpdated = true;
                     }
-                    updateSpecialMeasurements();
-                    leftUpdated = true;
                     isLeftReady = false;
                 }
                 
@@ -378,14 +393,13 @@ int16_t main(void)
                     }
                     
                     //full measurement performed
-                    //TODO update flags only if measurement was correct ?
                     measurementFinished();
                     
                     //Reset status 
                     rightUpdated = false;
                     leftUpdated = false;
                 }else if(rightUpdated || leftUpdated){
-                    //Raise interrupt if we have a new measurement and int is
+                    //Raise interrupt if we have a new measurement and INT is
                     //configured so
                     if(CONFIG_Hbits.INT_MODE == INT_L_OR_R){
                         raiseInt();
