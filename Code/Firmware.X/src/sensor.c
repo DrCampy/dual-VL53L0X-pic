@@ -108,21 +108,78 @@ void updateConfig(){ //static variables for previous states
             disableXTalk();
         }    
     }
-    
-    //INT_MODE, CONV, CONT_MODE are managed automatically by the main code and
-    // do not need to be "applied".
 
     //DURATION
     if(prevCONFIG_Hbits.DURATION != CONFIG_Hbits.DURATION){
-        uint32_t totDuration = 1000*(20+CONFIG_Hbits.DURATION*3);
-        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(RightSensor, totDuration);
-        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(LeftSensor, totDuration);
+        uint32_t totDuration = 20+CONFIG_Hbits.DURATION*3; 
+        totDuration *= 1000;//*(20+(CONFIG_Hbits.DURATION*3));
+        updateDuration(RightSensor, totDuration);
+        updateDuration(LeftSensor, totDuration);
     }
     
     prevCONFIG_Lbits = CONFIG_Lbits;
     prevCONFIG_Hbits = CONFIG_Hbits;
     
     CONFIG_UPDATEDflag = false;
+}
+
+void updateDuration(VL53L0X_DEV sensor, uint32_t duration){
+    if(duration >= 29000 && duration < 50000){
+        /* Standard measurement mode
+         * sigma = 18*65536 MCPS (FixedPoint1616)
+         * return signal = 0.25*65536 (FixedPoint1616)
+         * VCSEL pre_range = 14
+         * VCSEL final_range = 10
+         */
+        VL53L0X_SetLimitCheckValue(sensor,
+                VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE,
+                (FixPoint1616_t)(0.25*65536));
+        VL53L0X_SetLimitCheckValue(sensor, 
+                VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE,
+                (FixPoint1616_t)(18*65536));
+        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(sensor,duration);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_PRE_RANGE, 14);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 10);
+    }else if(duration < 29000){
+        /* High speed measurement mode
+         * sigma = 32*65536
+         * return signal = 0.25*65536
+         * VCSEL pre_range = 14
+         * VCSEL final_range = 10
+         */
+        VL53L0X_SetLimitCheckValue(sensor,
+                VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE,
+                (FixPoint1616_t)(0.25*65536));
+        VL53L0X_SetLimitCheckValue(sensor, 
+                VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE,
+                (FixPoint1616_t)(32*65536));
+        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(sensor,duration);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_PRE_RANGE, 14);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 10);
+    }else if(duration >= 50000){
+        /* long range measurement mode
+         * sigma = 60*65536
+         * return signal = 0.1*65536
+         * VCSEL pre_range = 18
+         * VCSEL final_range = 14
+         */  
+    
+        VL53L0X_SetLimitCheckValue(sensor,
+                VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE,
+                (FixPoint1616_t)(0.25*65536));
+        VL53L0X_SetLimitCheckValue(sensor, 
+                VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE,
+                (FixPoint1616_t)(32*65536));
+        VL53L0X_SetMeasurementTimingBudgetMicroSeconds(sensor,duration);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
+        VL53L0X_SetVcselPulsePeriod(sensor,
+                VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
+    }
 }
 
 /*
