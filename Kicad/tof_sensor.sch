@@ -6,11 +6,11 @@ encoding utf-8
 Sheet 1 1
 Title "Frustrating Box - TOF Distance sensor"
 Date "2019-12-04"
-Rev "2.1"
+Rev "1.0"
 Comp "Université de Liège"
-Comment1 "Rev 1.1. Removing 3.3 / 5v jumpers.  Updating MCLR circuit to use shottky diode"
-Comment2 "Rev 2.0 Replacing PIC16F by PIC24F16KL402"
-Comment3 "Rev 2.1 Adding DIP, updating PIC layout, moving signals"
+Comment1 "Rev 1.0 First release"
+Comment2 ""
+Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
