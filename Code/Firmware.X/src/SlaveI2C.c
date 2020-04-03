@@ -81,8 +81,7 @@ void I2CSlaveExec(){
 
             //Clears the ReadBuffer Full flag
             char c = I2CSlaveGetByte();
-            //I2CSlaveAck();
-            I2C2CONLbits.SCLREL = 1;
+            I2CSlaveAck();
         }else{
             //we are transmitting (ADD<0> = 1)
             //We have to send requested data.
