@@ -5,11 +5,11 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Frustrating Box - TOF Distance sensor"
-Date "2019-12-04"
-Rev "1.0"
+Date "2020-03-22"
+Rev "1.1"
 Comp "Université de Liège"
 Comment1 "Rev 1.0 First release"
-Comment2 ""
+Comment2 "Rev 1.1 Fixed interrupt circuit, added TP6, changed ICSP Vdd net, changed D1 footprint"
 Comment3 ""
 Comment4 ""
 $EndDescr
