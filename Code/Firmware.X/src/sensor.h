@@ -72,11 +72,6 @@ extern "C" {
     extern uint8_t minDist;
     extern uint8_t maxDist;
     
-    void powerOffRightSensor();
-    void powerOnRightSensor();
-    void powerOffLeftSensor();
-    void powerOnLeftSensor();
-    
     void setConfigL(uint8_t config_l);
     void setConfigH(uint8_t config_l);
     

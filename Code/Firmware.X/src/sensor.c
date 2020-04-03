@@ -27,22 +27,6 @@ uint8_t avgDist     = 0;
 uint8_t minDist;
 uint8_t maxDist;
 
-void powerOffRightSensor(){
-    LATBbits.LATB12 = 0;
-}
-
-void powerOnRightSensor(){
-    LATBbits.LATB12 = 1;
-}
-
-void powerOffLeftSensor(){
-    LATBbits.LATB15 = 0;
-}
-
-void powerOnLeftSensor(){
-    LATBbits.LATB15 = 1;
-}
-
 /*
  * Apply the new config to the device.
  * Structure of config_l:
@@ -114,24 +98,6 @@ uint8_t getConfigH(){
 void updateConfig(){ //static variables for previous states
     if(CONFIG_UPDATEDflag == false){
         return; //COnfig was not updated since last execution
-    }
-
-    // L_EN flag
-    if(prevCONFIG_Lbits.L_EN != CONFIG_Lbits.L_EN){
-        if(CONFIG_Lbits.L_EN){
-            powerOnLeftSensor();
-        }else{
-            powerOffLeftSensor();
-        }    
-    }
-    
-    //R_EN flag
-    if(prevCONFIG_Lbits.R_EN != CONFIG_Lbits.R_EN){
-        if(CONFIG_Lbits.R_EN){
-            powerOnRightSensor();
-        }else{
-            powerOffRightSensor();
-        }
     }
     
     //XTALK Flag

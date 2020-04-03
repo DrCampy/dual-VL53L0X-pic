@@ -117,11 +117,10 @@ int16_t main(void)
     }
 
     /* Configure right sensor address */
-    powerOffLeftSensor(); /* Put left sensor to sleep */
-    powerOnRightSensor(); /* Wake up right sensor */
+    LATBbits.LATB15 = 0; /* Put left sensor to sleep */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     VL53L0X_SetDeviceAddress(RightSensor, 0x54);
-    powerOnLeftSensor();
+    LATBbits.LATB15 = 1; /* Wakes up left sensor */
     __delay_ms(2); /* sensor needs 2 ms to wake up */
     
     StatusR = VL53L0X_DataInit(RightSensor);
