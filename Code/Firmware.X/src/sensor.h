@@ -83,6 +83,8 @@ extern "C" {
 
     void updateConfig();
     
+    void updateDuration(VL53L0X_DEV sensor, uint32_t duration);
+    
     void raiseInt();
     void resetInt();
     
