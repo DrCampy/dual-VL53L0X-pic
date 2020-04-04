@@ -348,12 +348,10 @@ int16_t main(void)
                     StatusR &= VL53L0X_ClearInterruptMask(RightSensor, 0 /*unused*/);
                     if(RightMeasurement.RangeStatus == 0){
                         rightDist = RightMeasurement.RangeMilliMeter/10;
-                        updateSpecialMeasurements();
                         rightUpdated = true;    
                     }else if(RightMeasurement.RangeStatus == 4){
                         //Out of range
                         rightDist = 255;
-                        updateSpecialMeasurements();
                         rightUpdated = true;
                     }
 
@@ -372,16 +370,16 @@ int16_t main(void)
                     if(LeftMeasurement.RangeStatus == 0){
                         //Valid measurement
                         leftDist = LeftMeasurement.RangeMilliMeter/10;
-                        updateSpecialMeasurements();
                         leftUpdated = true;
                     }else if(LeftMeasurement.RangeStatus == 4){
                         //Out of range
                         leftDist = 255;
-                        updateSpecialMeasurements();
                         leftUpdated = true;
                     }
                     isLeftReady = false;
                 }
+                
+                updateSpecialMeasurements();
                 
                 //Updates interrupt state, CONV and CONFIG_FINISHED flags
                 bool rightCond = rightUpdated || !CONFIG_Lbits.R_EN;
@@ -438,13 +436,23 @@ void blinkStatusLed(uint8_t blinks, uint16_t blinkDuration,\
 }
 
 void updateSpecialMeasurements(){
-    // Update min and max
-    if(rightDist < leftDist){
-        minDist = rightDist;
-        maxDist = leftDist;
-    }else{
-        minDist = leftDist;
-        maxDist = rightDist;
+    if(!CONFIG_Lbits.L_EN & !CONFIG_Lbits.R_EN){ //Right and left disabled
+        minDist = maxDist = rightDist = leftDist = 255;
+    }else if(!CONFIG_Lbits.L_EN){ //Left disabled
+        minDist = maxDist = rightDist;
+        leftDist = 255;
+    }else if(!CONFIG_Lbits.R_EN){ //Right disabled
+        minDist = maxDist = leftDist;
+        rightDist = 255;
+    }else{ //Both sensors enabled
+        // Update min and max
+        if(rightDist < leftDist){
+            minDist = rightDist;
+            maxDist = leftDist;
+        }else{
+            minDist = leftDist;
+            maxDist = rightDist;
+        }
     }
     avgDist = (rightDist + leftDist)/2;
 }
