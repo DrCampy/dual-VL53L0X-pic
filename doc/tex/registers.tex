@@ -1,28 +1,5 @@
+\section{Registers}
 Description of the \iic registers.
-
-\iffalse
- \subsection{Overview}
- \begin{multicols}{2}
-  \centering{Configuration}
-  \begin{itemize}
-   \item \texttt{CONFIG\_L \quad 0x00}
-   \item \texttt{CONFIG\_H \quad 0x01}
-   \item \texttt{ADDRESS \quad 0x02}
-
-  \end{itemize}
-
-  \columnbreak
-  \centering{Data}
-  \begin{itemize}
-   \item \texttt{RIGHT \quad 0x10}
-   \item \texttt{LEFT \quad 0x11}
-   \item \texttt{MIN \quad 0x12}
-   \item \texttt{MAX \quad 0x13}
-   \item \texttt{AVG \quad 0x14}
-  \end{itemize}
-
- \end{multicols}
-\fi
 \subsection{Configuration Registers}
 \subsubsection{\texttt{CONFIG\_L}: Configuration register (low part)}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} |c|c|c|c|c|c|c|c|}
@@ -69,7 +46,7 @@ Description of the \iic registers.
        Hardware set to 0 after an \iic read of a data register.
 \end{description}
 
-\subsubsection{\texttt{CONFIG\_H}: Configuration register (high part)}
+\subsubsection{\texttt{CONFIG\_H}: Configuration register (high part)}\label{reg:configh}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} |c|c|c|c|c|c|c|c|}
  \hline
  \multicolumn{8}{|c|}{\texttt{CONFIG\_H} (0x01)}\\
@@ -112,6 +89,7 @@ Description of the \iic registers.
  \item[\texttt{ADDRESS}] \qquad \textbf{Readable / Writeable / Initialize at 0x42}\\
        \iic Address of the device
 \end{description}
+\textit{\textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.}
 
 \subsection{Data Registers}
 All the data registers contains the distance sensed by the two VL53L0X chips. The data are formatted on one byte, unsigned integer representing the distance in centimeters.

@@ -1,6 +1,8 @@
-In RUN mode if the LED is not forced off (see section \ref{sec:BootModes}) the sensor might indicate an error code by blinking the status LED a few times. This should normally not happen during normal operation and is mainly used for debug purposes.
-\newline
+\section{Error codes}
+In RUN mode if the LED is not forced off (see section \ref{sec:BootModes}) the sensor might indicate an error code by blinking the status LED a few times. This should normally not happen during normal operation and is mainly used for debug purposes. The error codes are displayed in table \ref{table:errors}.
+\end{multicols}
 \noindent
+\begingroup
 \begin{tabularx}{\textwidth}{|c|X|}
  \hline
  \thead{Number of blinks} & \thead{Reason}                                                                        \\
@@ -22,4 +24,5 @@ In RUN mode if the LED is not forced off (see section \ref{sec:BootModes}) the s
  8                        & \makecell[lc]{In crosstalk calibration mode: could not perform crosstalk calibration. \\In reset mod: could not get crosstalk calibration data.\\Otherwise: could not load crosstalk calibration data.} \\
  \hline
 \end{tabularx}
-
+\captionof{table}{List of error codes}\label{table:errors}
+\endgroup

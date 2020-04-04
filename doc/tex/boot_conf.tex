@@ -1,12 +1,32 @@
+\begin{multicols}{2}
+\section{Boot Configuration and Calibration Routines}
 3 boot configuration switches are available on the board to select the boot mode of the sensor.
-
 \subsection{Boot Modes} \label{sec:BootModes}
 The first switch controls the main operation mode. Either RUN mode or CAL mode.
 \paragraph{In RUN mode} the second switch control the LED behaviour.\\
 The third switch control the \iic address.
-\paragraph{In CAL mode} the second and third switches control the calibration to perform. The led always displays the status.
-\newline
-\noindent
+\paragraph{In CAL mode} the second and third switches control the calibration to perform. The led always displays the status.\\
+All the boot modes available are shown in table \ref{table:bootmode}.
+
+\subsection{Calibration routines}
+When booting in calibration mode the status LED will blink a few times (0.5s ON, 0.5s OFF) indicating the calibration routine performed. The LED will then be kept lit until the calibration is over. The LED will then be kept lit off and the sensor can then be safely powered off. For detailed informations on the calibration requirements check the chapter 2 of the VL53L0X API User Manual \cite{tofAPI}.
+
+\subsubsection{SPAD Calibration}
+Status LED blinks 2 times. Optimize the dynamics of the system. It lasts for approximately 10ms. Nothing special is required to perform this calibration. It must be performed with the protective glass cover if you use one.
+
+\subsubsection{Offset Calibration}
+Status LED blinks 3 times. Corrects the mean offset of the measurement compared to the real distance. It lasts for approximately 300ms. To perform this calibration you must place a white target (if possible 88\% reflectance) at precisely 10 cm in front of the sensor in a dark environment. It must be performed with the protective glass cover if you use one.
+
+\subsubsection{Crosstalk Calibration}
+Status LED blinks 4 times.
+If using a protective window in front of the sensor a sometimes significant fraction of the emitted signal goes back to the sensor after having been reflected by the protective window instead of the target. This leads to false measurements with a non-linear behaviour.
+This calibration routine tries to correct those errors and lasts approximately 1sec. To perform this calibration you must place a grey (17\% reflectance) target 50 cm in front of the target. This should be able to correct the crosstalk due to a good quality window. If the window you use produces too much crosstalk this might not suffice to correct the error and you might have to edit the crosstalk calibration parameters in the firmware (\texttt{config.h}).
+
+\subsubsection{Reset}
+Status LED blinks 5 times.
+All the calibration parameters will be reset to default.
+\end{multicols}
+\begingroup
 \begin{tabularx}{\textwidth}{|c|c|c|X|}
  \hline
  \thead{Switch 1} & \thead{Switch 2} & \thead{Switch 3} & \thead{Behaviour}                                                                                              \\
@@ -26,25 +46,8 @@ The third switch control the \iic address.
  ON               & ON               & OFF              & CAL mode. Crosstalk calibration routine.                                                                       \\
  \hline
  ON               & ON               & ON               & CAL mode. Resets the calibration parameters to the default parameters factory programmed in the VL53L0X chips. \\
- \hline
+\hline
 \end{tabularx}
-\textit{\textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.}
-
-\subsection{Calibration routines}
-When booting in calibration mode the status LED will blink a few times (0.5s ON, 0.5s OFF) indicating the calibration routine performed. The LED will then be kept lit until the calibration is over. The LED will then be kept lit off and the sensor can then be safely powered off. For detailed informations on the calibration requirements check the chapter 2 of the VL53L0X API User Manual \cite{tofAPI}.
-
-\subsubsection{SPAD Calibration}
-Status LED blinks 2 times. Optimize the dynamics of the system. It lasts for approximately 10ms. Nothing special is required to perform this calibration. It must be performed with the protective glass cover if you use one.
-
-\subsubsection{Offset Calibration}
-Status LED blinks 3 times. Corrects the mean offset of the measurement compared to the real distance. It lasts for approximately 300ms. To perform this calibration you must place a white target (if possible 88\% reflectance) at precisely 10 cm in front of the sensor in a dark environment. It must be performed with the protective glass cover if you use one.
-
-\subsubsection{Crosstalk Calibration}
-Status LED blinks 4 times.
-If using a protective window in front of the sensor a sometimes significant fraction of the emitted signal goes back to the sensor after having been reflected by the protective window instead of the target. This leads to false measurements with a non-linear behaviour.
-This calibration routine tries to correct those errors and lasts approximately 1sec. To perform this calibration you must place a grey (17\% reflectance) target 50 cm in front of the target. This should be able to correct the crosstalk due to a good quality window. If the window you use produces too much crosstalk this might not suffice to correct the error and you might have to edit the crosstalk calibration parameters in the firmware (\texttt{config.h}).
-
-
-\subsubsection{Reset}
-Status LED blinks 5 times.
-All the calibration parameters will be reset to default.
+\captionof{table}{The different boot modes available.}
+\label{table:bootmode}
+\endgroup

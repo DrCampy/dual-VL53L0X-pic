@@ -5,8 +5,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+\usepackage{caption}
 \usepackage{courier}
-\usepackage{datetime}
 \usepackage{fancyhdr}
 \usepackage{float}
 \usepackage{graphicx}
@@ -17,7 +17,7 @@
 \usepackage{pdfpages}
 \usepackage{soul}
 \usepackage{tabularx}
-\usepackage[normalem]{ ulem }
+\usepackage[normalem]{ulem}
 \usepackage{vhistory}
 \usepackage{xcolor}
 \usepackage{tikz}
@@ -28,55 +28,49 @@
 \renewcommand\theadalign{bc}
 \renewcommand\theadfont{\bfseries}
 \renewcommand\theadgape{\Gape[4pt]}
+\setlength\columnsep{30pt}
 
-\newdateformat{monthyeardate}{%
-  \monthname[\THEMONTH], \THEYEAR}
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{Hawkseye - Datasheet Rev. A}
+\lhead{Hawkseye - Datasheet \vhCurrentVersion}
 \lfoot{Frustrating Box}
 \cfoot{\thepage / \pageref{LastPage}}
-\rfoot{\monthyeardate\today}
-
+\rfoot{\vhCurrentDate}
 
 \begin{document}
 
 \input{title.tex}
 
-\section{Introduction}
 \input{description.tex}
 \pagebreak[3]
 
-\section{Layout}
 \input{layout.tex}
 \pagebreak[4]
 
-\section{Interfacing With the Sensor}
 \input{interfaces.tex}
 \pagebreak[3]
 
-\section{Registers}
 \input{registers.tex}
 \pagebreak[3]
 
-\section{Boot Configuration and Calibration Routines}
 \input{boot_conf.tex}
 \pagebreak[3]
 
-\section{Error codes}
+\input{modes.tex}
+
 \input{errors.tex}
 
 \appendix
 \newpage
-\section{Bill Of Material}
 \input{bill-of-material.tex}
 
 \section{Electric Diagram}
 \includepdf[pages=-, landscape]{../documents/schematicV1.1.pdf}
 
 \begin{versionhistory}
-	\vhEntry{Rev. A}{03 April 2020}{Morgan Diepart}{Updated to PCB V1.1}
+	\vhEntry{Rev. A}{03 April 2020}{Morgan Diepart}{First release}
+	\vhEntry{Rev. B}{04 April 2020}{Morgan Diepart}{Updated to PCB V1.1, added section for the measurement modes}
 \end{versionhistory}
 
 \nocite{*}

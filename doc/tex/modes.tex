@@ -1,0 +1,8 @@
+\section{Measurement modes}
+\begin{multicols}{2}
+Depending on the configuration of the \texttt{CONFIG\_H}(Section \ref{reg:configh}) the sensor will be in one of 3 possible measurement modes.
+\begin{description}
+	\item[Standard mode] This is the default configuration and is enabled for a time budget allocated of 29ms (included) up to 50ms (excluded). That is $$ 3 \leq \texttt{DURATION} < 20 $$. The measurement range can go up to 120cm in correct conditions with a reasonable error on the measurement.
+	\item[Fast mode] This mode is enabled when the time budget allocated is between 20ms and 29ms. That is $$0 \leq \texttt{DURATION} < 3$$. The measurement range is reduced and the error on the measurement is increased.
+	\item[Long Range mode]This mode is enabled for a time budget allocated from 50ms and up. That is $$ 50 \leq \texttt{DURATION} \leq 63$$. The measurement range is increased and can go up to 200cm in dark environments. The error will increase with the measured distance.
+\end{description}
