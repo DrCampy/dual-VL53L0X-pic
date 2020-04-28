@@ -11,15 +11,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-/*
-#define L_EN            0b10000000
-#define R_EN            0b01000000
-#define XTALK           0b00100000
-#define AUTO_INC        0b00010000
-#define CONT_MODE       0b00001000
-#define CONV            0b00000100
-#define CONV_FINISHED   0b00000010
-*/
+
 #define INT_OFF         ((uint8_t)0)
 #define INT_L_AND_R     ((uint8_t)1)
 #define INT_L_OR_R      ((uint8_t)2)
