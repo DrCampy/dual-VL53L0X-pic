@@ -1,4 +1,5 @@
 (sym_lib_table
   (lib (name distance_sensors)(type Legacy)(uri ${KIPRJMOD}/libraries/distance_sensors.lib)(options "")(descr ""))
   (lib (name PIC24FJ64GA702)(type Legacy)(uri ${KIPRJMOD}/libraries/PIC24FJ64GA702.lib)(options "")(descr ""))
+  (lib (name component_hawkseye)(type Legacy)(uri "D:/Users/Morgan Diepart/Documents/GitHub/dual-VL53L0X-pic/kicad-symbol/component_hawkseye.lib")(options "")(descr ""))
 )
