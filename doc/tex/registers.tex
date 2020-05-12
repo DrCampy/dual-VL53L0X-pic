@@ -89,7 +89,7 @@ Description of the \iic registers.
  \item[\texttt{ADDRESS}] \qquad \textbf{Readable / Writeable / Initialize at 0x42}\\
        \iic Address of the device
 \end{description}
-\textit{\textbf{Note:} If you change the \iic address of the sensor while in backup address mode the change will only be effective at the next boot in normal \iic address mode.}
+\textit{\textbf{Note:} If the \iic address of the sensor is changed while in backup address mode the change will only be effective at the next boot in normal \iic address mode.}
 
 \subsection{Data Registers}
 All the data registers contains the distance sensed by the two VL53L0X chips. The data are formatted on one byte, unsigned integer representing the distance in centimeters.
