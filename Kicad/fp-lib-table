@@ -1,3 +1,5 @@
 (fp_lib_table
-  (lib (name footprints)(type KiCad)(uri ${KIPRJMOD}/libraries/footprints.pretty)(options "")(descr ""))
+  (lib (name Electrohype_Conn)(type KiCad)(uri ${KIPRJMOD}/../electrohype/footprints/Electrohype_Conn.pretty)(options "")(descr ""))
+  (lib (name Electrohype_Misc)(type KiCad)(uri ${KIPRJMOD}/../electrohype/footprints/Electrohype_Misc.pretty)(options "")(descr ""))
+  (lib (name Electrohype_Power)(type KiCad)(uri ${KIPRJMOD}/../electrohype/footprints/Electrohype_Power.pretty)(options "")(descr ""))
 )

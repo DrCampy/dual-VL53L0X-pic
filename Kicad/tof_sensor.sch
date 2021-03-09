@@ -13,17 +13,6 @@ Comment2 "Rev 1.1 Fixed interrupt circuit, added TP6, changed ICSP Vdd net, chan
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L distance_sensors:VL53L0X U3
-U 1 1 5DBAFB11
-P 7000 1600
-F 0 "U3" H 7350 800 50  0000 C CNN
-F 1 "VL53L0X" H 6750 2000 50  0000 C CNN
-F 2 "footprints:VL53L0X" H 7000 1500 50  0001 C CNN
-F 3 "" H 7000 1500 50  0001 C CNN
-	1    7000 1600
-	1    0    0    -1  
-$EndComp
 Text Label 9400 3950 2    50   ~ 0
 SDA1
 Text Label 9400 4050 2    50   ~ 0
@@ -515,17 +504,6 @@ F 3 "" H 8150 1800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Connection ~ 8150 1800
-$Comp
-L distance_sensors:VL53L0X U4
-U 1 1 5DC28D88
-P 9800 1600
-F 0 "U4" H 10150 800 50  0000 C CNN
-F 1 "VL53L0X" H 9550 2000 50  0000 C CNN
-F 2 "footprints:VL53L0X" H 9800 1500 50  0001 C CNN
-F 3 "" H 9800 1500 50  0001 C CNN
-	1    9800 1600
-	1    0    0    -1  
-$EndComp
 Text Notes 8600 750  0    50   ~ 0
 RIGHT
 Wire Wire Line
@@ -758,7 +736,7 @@ U 1 1 5DD8B607
 P 1200 2400
 F 0 "J1" H 1300 2000 50  0000 C CNN
 F 1 "Conn_01x06_Male" H 1200 2750 50  0000 C CNN
-F 2 "footprints:Conn_01x06_2.54mm_Horizontal_SMD_Handsoldered" H 1200 2400 50  0001 C CNN
+F 2 "Electrohype_Conn:Conn_01x06_2.54mm_Horizontal_SMD_Handsoldered" H 1200 2400 50  0001 C CNN
 F 3 "~" H 1200 2400 50  0001 C CNN
 	1    1200 2400
 	1    0    0    -1  
@@ -947,7 +925,7 @@ U 1 1 5DE7D246
 P 1750 6400
 F 0 "SW1" H 1750 6867 50  0000 C CNN
 F 1 "SW_DIP_x03" H 1750 6776 50  0000 C CNN
-F 2 "footprints:DIP_Switch_CTS_219_Series_Gull_Wing_HandSoldered" H 1750 6400 50  0001 C CNN
+F 2 "Electrohype_Misc:DIP_Switch_CTS_219_Series_Gull_Wing_HandSoldered" H 1750 6400 50  0001 C CNN
 F 3 "~" H 1750 6400 50  0001 C CNN
 	1    1750 6400
 	1    0    0    -1  
@@ -1176,7 +1154,7 @@ U 1 1 5E1C2121
 P 1550 1250
 F 0 "J2" H 1468 1667 50  0000 C CNN
 F 1 "Conn_01x05" H 1468 1576 50  0000 C CNN
-F 2 "footprints:SolderWirePad_01x05_2-5mmDrill_HandSoldering" H 1550 1250 50  0001 C CNN
+F 2 "Electrohype_Conn:SolderWirePad_01x05_2-5mmDrill_HandSoldering" H 1550 1250 50  0001 C CNN
 F 3 "~" H 1550 1250 50  0001 C CNN
 	1    1550 1250
 	-1   0    0    -1  
@@ -1402,17 +1380,6 @@ Wire Notes Line
 Text Notes 7450 5600 0    50   ~ 0
 Test Points
 $Comp
-L PIC24FJ64GA702:PIC24FJ64GA002 U2
-U 1 1 5DEF71EE
-P 4600 3250
-F 0 "U2" H 6650 3437 60  0000 C CNN
-F 1 "PIC24FJ64GA002" H 6650 3331 60  0000 C CNN
-F 2 "Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm" H 4900 1850 60  0001 C CNN
-F 3 "" H 5100 2500 60  0000 C CNN
-	1    4600 3250
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:VCC #PWR02
 U 1 1 5E633983
 P 1800 2050
@@ -1556,4 +1523,37 @@ F 3 "~" H 9000 6450 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	1750 1150 2450 1150
+$Comp
+L Electrohype_CPU:PIC24FJ64GA002 U2
+U 1 1 60475C56
+P 4600 3250
+F 0 "U2" H 6650 3543 60  0000 C CNN
+F 1 "PIC24FJ64GA002" H 6650 3437 60  0000 C CNN
+F 2 "Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm" H 4900 1850 60  0001 C CNN
+F 3 "https://ww1.microchip.com/downloads/en/DeviceDoc/39881e.pdf" H 6650 3331 60  0000 C CNN
+	1    4600 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Electrohype_Misc:VL53L0X U3
+U 1 1 6047D9BB
+P 7000 1800
+F 0 "U3" H 7000 2515 50  0000 C CNN
+F 1 "VL53L0X" H 7000 2424 50  0000 C CNN
+F 2 "Electrohype_Misc:VL53L0X" H 7000 2000 50  0001 C CNN
+F 3 "https://www.st.com/resource/en/datasheet/vl53l0x.pdf" H 7000 2000 50  0001 C CNN
+	1    7000 1800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Electrohype_Misc:VL53L0X U4
+U 1 1 6047EDB5
+P 9800 1800
+F 0 "U4" H 9800 2515 50  0000 C CNN
+F 1 "VL53L0X" H 9800 2424 50  0000 C CNN
+F 2 "Electrohype_Misc:VL53L0X" H 9800 2000 50  0001 C CNN
+F 3 "https://www.st.com/resource/en/datasheet/vl53l0x.pdf" H 9800 2000 50  0001 C CNN
+	1    9800 1800
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

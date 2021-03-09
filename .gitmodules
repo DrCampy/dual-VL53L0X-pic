@@ -1,0 +1,3 @@
+[submodule "electrohype"]
+	path = electrohype
+	url = https://github.com/mdiepart/Electrohype
